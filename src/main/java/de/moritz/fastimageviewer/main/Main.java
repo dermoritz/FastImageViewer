@@ -167,13 +167,14 @@ public class Main extends Application {
     }
     
     private void zoom100(double x, double y){
-        double imageHeight = imageView.getImage().getHeight();
-        double centery = imageView.getViewport().getHeight()/2;
-        double centerx = imageView.getViewport().getWidth()/2;
-        imageView.setTranslateX(centerx-x);
-        imageView.setTranslateY(centery-y);
-        imageView.setFitHeight(-1);
-        imageView.setFitWidth(-1);
+        double centery = imageView.getLayoutBounds().getHeight()/2;
+        double centerx = imageView.getLayoutBounds().getWidth()/2;
+        //imageView.setFitHeight(-1);
+        //imageView.setFitWidth(-1);
+        double xOffset = -1*(centerx-x);
+        double yOffset = -1*(centery-y);
+        imageView.setX(x);
+        imageView.setY(y);
     }
     
     

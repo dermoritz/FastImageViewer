@@ -58,7 +58,10 @@ public class ImageProviderImpl implements ImageProvider {
 		// check buffer
 		Image image = imageBuffer.get(index);
 		if (image == null) {
+			LOG.debug("Image not in buffer, loading it. :-(");
 			image = loadImage(imagePaths.get(index));
+		} else {
+			LOG.debug("Image found in buffer... :-)");
 		}
 		if (updateBufferTask != null) {
 			if (!updateBufferTask.isDone()) {

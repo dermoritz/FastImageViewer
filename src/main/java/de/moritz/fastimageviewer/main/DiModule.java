@@ -10,7 +10,13 @@ import de.moritz.fastimageviewer.image.ImageProviderImpl;
 import javafx.scene.Parent;
 
 public class DiModule extends AbstractModule {
+	
+	private String startPath;
 
+	public DiModule(String startPath){
+		this.startPath = startPath;
+	}
+	
     @Override
     protected void configure() {
          //
@@ -26,7 +32,7 @@ public class DiModule extends AbstractModule {
     @Provides
     @Singleton
     public ImageProvider getImageProvider(){
-        return new ImageProviderImpl("C:/Users/moritz/Downloads/1/Heidi18Years_2014-02-22_61_10000");
+        return new ImageProviderImpl(startPath);
     }
 
 }

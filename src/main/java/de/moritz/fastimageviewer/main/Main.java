@@ -10,31 +10,30 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class Main extends Application{
+public class Main extends Application {
 
-    
-    private static final Injector i = Guice.createInjector(new DiModule());
-    
-    public static void main(String[] args) {
-        Application.launch(args);
-    }
+	private static Injector i;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        
-        
-        Screen screen = Screen.getPrimary();
-        Rectangle2D bounds = screen.getVisualBounds();
-        primaryStage.setX(0);
-        primaryStage.setY(0);
-        primaryStage.setWidth(bounds.getWidth());
-        primaryStage.setHeight(bounds.getHeight());
-        
-        primaryStage.setScene(new Scene(i.getInstance(Parent.class)));
-        primaryStage.show();
-        
-    }
+	public static void main(String[] args) {
+		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "DEBUG");
 
-  
+		i = Guice.createInjector(new DiModule(args.length > 0 ? args[0] : null));
+		Application.launch(args);
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+
+		Screen screen = Screen.getPrimary();
+		Rectangle2D bounds = screen.getVisualBounds();
+		primaryStage.setX(0);
+		primaryStage.setY(0);
+		primaryStage.setWidth(bounds.getWidth());
+		primaryStage.setHeight(bounds.getHeight());
+
+		primaryStage.setScene(new Scene(i.getInstance(Parent.class)));
+		primaryStage.show();
+
+	}
 
 }

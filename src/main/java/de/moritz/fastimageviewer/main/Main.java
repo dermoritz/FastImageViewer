@@ -45,7 +45,7 @@ public class Main extends Application {
         primaryStage.setWidth(bounds.getWidth());
         primaryStage.setHeight(bounds.getHeight());
         
-        String imgPath = "C:/Users/moritz/Downloads/1/";
+        String imgPath = "C:/Users/moritz/Downloads/1/Heidi18Years_2014-02-22_61_10000";
         File file = new File(imgPath);
         imageList = getFiles(file.toPath());
 
@@ -168,17 +168,16 @@ public class Main extends Application {
     }
     
     private void zoom100(double x, double y){
-        double centery = imageView.getLayoutBounds().getHeight()/2;
-        double centerx = imageView.getLayoutBounds().getWidth()/2;
+    	imageView.setFitHeight(-1);
+        imageView.setFitWidth(-1);
+        
+        double centery = root.getLayoutBounds().getHeight()/2;
+        double centerx = root.getLayoutBounds().getWidth()/2;
         
         double xOffset = (centerx-x);
         double yOffset = (centery-y);
         imageView.setTranslateX(xOffset);
         imageView.setTranslateY(yOffset);
-    	
-    	
-    	//imageView.setFitHeight(-1);
-        //imageView.setFitWidth(-1);
 
     }
     

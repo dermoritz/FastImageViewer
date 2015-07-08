@@ -16,6 +16,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -44,7 +45,7 @@ public class Main extends Application {
         primaryStage.setWidth(bounds.getWidth());
         primaryStage.setHeight(bounds.getHeight());
         
-        String imgPath = "C:/Users/moritz/Downloads/1/Heidi18Years_2014-02-22_61_10000";
+        String imgPath = "C:/Users/moritz/Downloads/1/";
         File file = new File(imgPath);
         imageList = getFiles(file.toPath());
 
@@ -169,12 +170,16 @@ public class Main extends Application {
     private void zoom100(double x, double y){
         double centery = imageView.getLayoutBounds().getHeight()/2;
         double centerx = imageView.getLayoutBounds().getWidth()/2;
-        //imageView.setFitHeight(-1);
+        
+        double xOffset = (centerx-x);
+        double yOffset = (centery-y);
+        imageView.setTranslateX(xOffset);
+        imageView.setTranslateY(yOffset);
+    	
+    	
+    	//imageView.setFitHeight(-1);
         //imageView.setFitWidth(-1);
-        double xOffset = -1*(centerx-x);
-        double yOffset = -1*(centery-y);
-        imageView.setX(x);
-        imageView.setY(y);
+
     }
     
     

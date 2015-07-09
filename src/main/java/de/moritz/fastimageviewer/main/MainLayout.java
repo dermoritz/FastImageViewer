@@ -1,5 +1,8 @@
 package de.moritz.fastimageviewer.main;
 
+import java.io.File;
+import java.util.function.Function;
+
 import com.google.inject.Inject;
 
 import de.moritz.fastimageviewer.image.ImageProvider;
@@ -9,121 +12,148 @@ import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 
 public class MainLayout {
 
-	private ImageView imageView;
-	private StackPane root;
-	private ImageProvider ip;
+    private ImageView imageView;
+    private StackPane root;
+    private ImageProvider ip;
 
-	@Inject
-	private MainLayout(ImageProvider ip) {
-		this.ip = ip;
+    @Inject
+    private MainLayout(ImageProvider ip) {
+        this.ip = ip;
 
-		imageView = new ImageView();
+        imageView = new ImageView();
 
-		root = new StackPane();
+        root = new StackPane();
 
-		root.getChildren().add(imageView);
+        root.getChildren().add(imageView);
 
-		OnScroll onScroll = new OnScroll();
-		root.setOnScroll(onScroll);
-		OnResize onResize = new OnResize();
-		root.heightProperty().addListener(onResize);
-		root.widthProperty().addListener(onResize);
-		OnMouseDown onMouseDown = new OnMouseDown();
-		root.setOnMousePressed(onMouseDown);
-		root.setOnMouseReleased((event) -> fitImage());
+        OnScroll onScroll = new OnScroll();
+        root.setOnScroll(onScroll);
+        OnResize onResize = new OnResize();
+        root.heightProperty().addListener(onResize);
+        root.widthProperty().addListener(onResize);
+        OnMouseDown onMouseDown = new OnMouseDown();
+        root.setOnMousePressed(onMouseDown);
+        root.setOnMouseReleased((event) -> fitImage());
+        root.setOnDragOver((event) -> dragOver(event));
+        root.setOnDragDropped((event) -> dropFile(event));
 
-		if (ip.hasNext()) {
-			Image image = ip.getImage();
-			imageView.setImage(image);
-			fitImage();
-		}
-	}
+        if (ip.hasNext()) {
+            Image image = ip.getImage();
+            imageView.setImage(image);
+            fitImage();
+        }
+    }
 
-	public Parent getRoot() {
-		return root;
-	}
+    private void dragOver(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasFiles()) {
+            event.acceptTransferModes(TransferMode.LINK);
+        } else {
+            event.consume();
+        }
+    }
 
-	private void fitImage() {
-		imageView.autosize();
-		imageView.setTranslateX(0);
-		imageView.setTranslateY(0);
-		imageView.setScaleX(1);
-		imageView.setScaleY(1);
-		double width = root.getWidth();
-		double height = root.getHeight();
-		imageView.setPreserveRatio(true);
-		imageView.setFitHeight(height);
-		imageView.setFitWidth(width);
+    private void dropFile(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        boolean success = false;
+        if (db.hasFiles() && db.getFiles().size() > 0) {
+            ip.setPath(db.getFiles().get(0).toString());
+            Image image = ip.getImage();
+            imageView.setImage(image);
+            fitImage();
+        }
+        event.setDropCompleted(success);
+        event.consume();
+    }
 
-	}
+    public Parent getRoot() {
+        return root;
+    }
 
-	private class OnScroll implements EventHandler<ScrollEvent> {
+    private void fitImage() {
+        imageView.autosize();
+        imageView.setTranslateX(0);
+        imageView.setTranslateY(0);
+        imageView.setScaleX(1);
+        imageView.setScaleY(1);
+        double width = root.getWidth();
+        double height = root.getHeight();
+        imageView.setPreserveRatio(true);
+        imageView.setFitHeight(height);
+        imageView.setFitWidth(width);
 
-		public OnScroll() {
-		}
+    }
 
-		@Override
-		public void handle(ScrollEvent event) {
-			double deltaY = event.getDeltaY();
-			if (deltaY < 0) {
-				imageView.setImage(ip.next());
-			} else {
-				imageView.setImage(ip.prev());
-			}
-			fitImage();
-		}
+    private class OnScroll implements EventHandler<ScrollEvent> {
 
-	}
+        public OnScroll() {
+        }
 
-	private class OnResize implements ChangeListener<Number> {
+        @Override
+        public void handle(ScrollEvent event) {
+            double deltaY = event.getDeltaY();
+            if (deltaY < 0) {
+                imageView.setImage(ip.next());
+            } else {
+                imageView.setImage(ip.prev());
+            }
+            fitImage();
+        }
 
-		@Override
-		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-			fitImage();
-		}
+    }
 
-	}
+    private class OnResize implements ChangeListener<Number> {
 
-	private class OnMouseDown implements EventHandler<MouseEvent> {
+        @Override
+        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+            fitImage();
+        }
 
-		@Override
-		public void handle(MouseEvent event) {
-			double x = event.getX();
-			double y = event.getY();
-			zoom100(x, y);
-		}
+    }
 
-	}
+    private class OnMouseDown implements EventHandler<MouseEvent> {
 
-	private void zoom100(double x, double y) {
-		double oldHeight = imageView.getBoundsInLocal().getHeight();
-		double oldWidth = imageView.getBoundsInLocal().getWidth();
+        @Override
+        public void handle(MouseEvent event) {
+            double x = event.getX();
+            double y = event.getY();
+            zoom100(x, y);
+        }
 
-		boolean heightLarger = oldHeight > oldWidth;
-		imageView.setFitHeight(-1);
-		imageView.setFitWidth(-1);
-		// calculate scale factor
-		double scale = 1;
-		if (heightLarger) {
-			scale = imageView.getBoundsInLocal().getHeight() / oldHeight;
-		} else {
-			scale = imageView.getBoundsInLocal().getWidth() / oldWidth;
-		}
+    }
 
-		double centery = root.getLayoutBounds().getHeight() / 2;
-		double centerx = root.getLayoutBounds().getWidth() / 2;
+    private void zoom100(double x, double y) {
+        double oldHeight = imageView.getBoundsInLocal().getHeight();
+        double oldWidth = imageView.getBoundsInLocal().getWidth();
 
-		double xOffset = scale * (centerx - x);
-		double yOffset = scale * (centery - y);
-		imageView.setTranslateX(xOffset);
-		imageView.setTranslateY(yOffset);
+        boolean heightLarger = oldHeight > oldWidth;
+        imageView.setFitHeight(-1);
+        imageView.setFitWidth(-1);
+        // calculate scale factor
+        double scale = 1;
+        if (heightLarger) {
+            scale = imageView.getBoundsInLocal().getHeight() / oldHeight;
+        } else {
+            scale = imageView.getBoundsInLocal().getWidth() / oldWidth;
+        }
 
-	}
+        double centery = root.getLayoutBounds().getHeight() / 2;
+        double centerx = root.getLayoutBounds().getWidth() / 2;
+
+        double xOffset = scale * (centerx - x);
+        double yOffset = scale * (centery - y);
+        imageView.setTranslateX(xOffset);
+        imageView.setTranslateY(yOffset);
+
+    }
 
 }

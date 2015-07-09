@@ -63,12 +63,14 @@ public class ImageProviderImpl implements ImageProvider {
 		} else {
 			LOG.debug("Image found in buffer... :-)");
 		}
+		//cancel previous update task
 		if (updateBufferTask != null) {
 			if (!updateBufferTask.isDone()) {
 				updateBufferTask.cancel(true);
 				LOG.debug("Canceled update");
 			}
 		}
+		//start new update task
 		updateBufferTask = CompletableFuture.supplyAsync(() -> {
 			updateBuffer(index);
 			return 1;
@@ -147,7 +149,10 @@ public class ImageProviderImpl implements ImageProvider {
 		if(file.isDirectory()){
 			this.imageFolder = Paths.get(path);
 			getFiles();
-		} else{
+			currentIndex = 0;
+		} 
+		//browse folder of given image starting on given image
+		else{
 			this.imageFolder = Paths.get(file.getParent());
 			getFiles();
 			//searching given file an set index accordingly.
@@ -158,8 +163,6 @@ public class ImageProviderImpl implements ImageProvider {
 				}
 			}
 		}
-		
-
 	}
 
 

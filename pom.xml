@@ -34,6 +34,7 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<!-- is javafx plugin needed? -->
 			<plugin>
 				<groupId>com.zenjava</groupId>
 				<artifactId>javafx-maven-plugin</artifactId>
@@ -64,6 +65,26 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>external.atlassian.jgitflow</groupId>
+				<artifactId>jgitflow-maven-plugin</artifactId>
+				<version>1.0-m5.1</version>
+				<configuration>
+					<pushReleases>true</pushReleases>
+					<pushFeatures>true</pushFeatures>
+					<pushHotfixes>true</pushHotfixes>
+					<scmCommentPrefix>done by jgitflow-maven-plugin: </scmCommentPrefix>
+					<noDeploy>true</noDeploy>
+					<flowInitContext>
+						<masterBranchName>master</masterBranchName>
+						<developBranchName>develop</developBranchName>
+						<featureBranchPrefix>feature/</featureBranchPrefix>
+						<releaseBranchPrefix>release/</releaseBranchPrefix>
+						<hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
+						<versionTagPrefix />
+					</flowInitContext>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.moritz</groupId>
 	<artifactId>FastImageViewer</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>FastImageViewer</name>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>

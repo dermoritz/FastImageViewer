@@ -1,7 +1,7 @@
 package de.moritz.fastimageviewer.main;
 
-import java.io.File;
-import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -14,6 +14,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.TransferMode;
@@ -24,17 +26,35 @@ public class MainLayout {
     private ImageView imageView;
     private StackPane root;
     private ImageProvider ip;
-
+    
+    private static final Logger LOG = LoggerFactory.getLogger(MainLayout.class);
+    
     @Inject
     private MainLayout(ImageProvider ip) {
         this.ip = ip;
 
         imageView = new ImageView();
-
         root = new StackPane();
-
+        root.setFocusTraversable(true);
         root.getChildren().add(imageView);
+        
+        //root.requestFocus();
+        registerEvents();
+        
+        //load first image if there is one
+        if (ip.hasNext()) {
+            Image image = ip.getImage();
+            imageView.setImage(image);
+            fitImage();
+        }
+    }
 
+    private void registerEvents() {
+        root.setOnKeyPressed((event) -> {
+            System.out.println("got it");
+            LOG.debug("Key captured.");
+            pageKey(event);
+        });
         OnScroll onScroll = new OnScroll();
         root.setOnScroll(onScroll);
         OnResize onResize = new OnResize();
@@ -46,13 +66,22 @@ public class MainLayout {
         root.setOnDragOver((event) -> dragOver(event));
         root.setOnDragDropped((event) -> dropFile(event));
 
-        if (ip.hasNext()) {
-            Image image = ip.getImage();
-            imageView.setImage(image);
+        
+    }
+    
+    private void pageKey(KeyEvent event){
+        if(event.getCode() == KeyCode.PAGE_UP){
+            imageView.setImage(ip.prev());
+            event.consume();
+        } else if(event.getCode() == KeyCode.PAGE_DOWN){
+            imageView.setImage(ip.next());
+            event.consume();
+        }
+        if(event.isConsumed()){
             fitImage();
         }
     }
-
+    
     private void dragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasFiles()) {

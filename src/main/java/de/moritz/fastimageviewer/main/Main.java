@@ -30,8 +30,8 @@ public class Main extends Application {
 		primaryStage.setY(0);
 		primaryStage.setWidth(bounds.getWidth());
 		primaryStage.setHeight(bounds.getHeight());
-
-		primaryStage.setScene(new Scene(i.getInstance(Parent.class)));
+		Scene scene = new Scene(i.getInstance(Parent.class));
+		primaryStage.setScene(scene);
 		primaryStage.show();
 
 	}

@@ -34,8 +34,11 @@ public class MainLayout {
         this.ip = ip;
 
         imageView = new ImageView();
+        imageView.setFocusTraversable(true);
+        imageView.requestFocus();
+        
         root = new StackPane();
-        root.setFocusTraversable(true);
+       
         root.getChildren().add(imageView);
         
         //root.requestFocus();
@@ -51,8 +54,6 @@ public class MainLayout {
 
     private void registerEvents() {
         root.setOnKeyPressed((event) -> {
-            System.out.println("got it");
-            LOG.debug("Key captured.");
             pageKey(event);
         });
         OnScroll onScroll = new OnScroll();

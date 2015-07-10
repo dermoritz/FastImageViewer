@@ -80,7 +80,7 @@ public class ImageProviderImpl implements ImageProvider {
 	}
 
 	private void updateBuffer(int index) {
-		LOG.debug("update buffer for index " + index);
+		LOG.debug("updateing buffer for index " + index);
 		int bufferPrevRange = 1;
 		int bufferNextRange = 2;
 

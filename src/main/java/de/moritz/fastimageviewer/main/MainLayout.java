@@ -53,9 +53,7 @@ public class MainLayout {
     }
 
     private void registerEvents() {
-        root.setOnKeyPressed((event) -> {
-            pageKey(event);
-        });
+        root.setOnKeyPressed(this::pageKey);
         OnScroll onScroll = new OnScroll();
         root.setOnScroll(onScroll);
         OnResize onResize = new OnResize();
@@ -64,12 +62,12 @@ public class MainLayout {
         OnMouseDown onMouseDown = new OnMouseDown();
         root.setOnMousePressed(onMouseDown);
         root.setOnMouseReleased((event) -> fitImage());
-        root.setOnDragOver((event) -> dragOver(event));
-        root.setOnDragDropped((event) -> dropFile(event));
+        root.setOnDragOver(this::dragOver);
+        root.setOnDragDropped(this::dropFile);
 
         
     }
-    
+
     private void pageKey(KeyEvent event){
         if(event.getCode() == KeyCode.PAGE_UP){
             imageView.setImage(ip.prev());

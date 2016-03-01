@@ -12,10 +12,12 @@ import javafx.scene.Parent;
 
 public class DiModule extends AbstractModule {
 
+    private final String[] args;
     private String startPath;
 
-    public DiModule( String startPath ) {
-        this.startPath = startPath;
+    public DiModule( String[] args ) {
+        this.startPath = args == null ? null : args[0];
+        this.args = args;
     }
 
     @Override
@@ -33,8 +35,12 @@ public class DiModule extends AbstractModule {
     @Provides
     @Singleton
     public ImageProvider getImageProvider() {
-        if( startPath.toLowerCase().startsWith( "http" ) ) {
-            return new ImageServiceImageProvider( startPath );
+        if( startPath != null && startPath.toLowerCase().startsWith( "http" ) ) {
+            ImageServiceImageProvider imageService = new ImageServiceImageProvider(startPath);
+            if(args.length>1){
+                imageService.setPath(args[1]);
+            }
+            return imageService;
         } else {
             return new ImageProviderImpl( startPath );
         }

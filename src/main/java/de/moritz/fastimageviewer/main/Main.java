@@ -17,7 +17,7 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "DEBUG");
 
-		i = Guice.createInjector(new DiModule(args.length > 0 ? args[0] : null));
+		i = Guice.createInjector(new DiModule(args.length > 0 ? args : null));
 		Application.launch(args);
 	}
 

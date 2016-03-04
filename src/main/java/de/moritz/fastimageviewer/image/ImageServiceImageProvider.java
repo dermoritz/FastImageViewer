@@ -69,7 +69,7 @@ public class ImageServiceImageProvider implements ImageProvider {
     @Override
     public Image prev() {
         Image result = null;
-        if(--historyIndex >=0 && historyBuffer.size()>historyIndex){
+        if(--historyIndex >=0){
             result = historyBuffer.get(historyIndex);
         } else if (historyBuffer.size()>0) {
             LOG.debug("reached end of history.");
@@ -95,13 +95,17 @@ public class ImageServiceImageProvider implements ImageProvider {
             }
         }
         Image poll = buffer.poll();
-        historyIndex = historyBuffer.size()-1;
-        historyBuffer.add(poll);
+        addToHistory(poll);
+        return poll;
+    }
+    
+    private void addToHistory(Image image){
+        historyBuffer.add(image);
         if(historyBuffer.size()>HISTORY_BUFFER_SIZE){
             LOG.debug("revoving first image from history buffer.");
             historyBuffer.remove(0);
         }
-        return poll;
+        historyIndex = historyBuffer.size()-1;
     }
 
     private Image getImageFromResource(String path) {

@@ -9,7 +9,7 @@ public class RunMain {
 
     @Test
     public void runMainOnImageService(){
-        Main.main(new String[]{"http://user1:awdrg@localhost"});
+        Main.main(new String[]{"http://localhost", "/numbers/sort"});
     }
 
 

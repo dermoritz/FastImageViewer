@@ -8,25 +8,18 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.layout.AnchorPane?>
 
-<SplitPane dividerPositions="0.09798994974874371" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1">
+<SplitPane fx:id="root" dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
   <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-         <children>
-            <ToolBar fx:id="toolBar" layoutX="14.0" layoutY="14.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <items>
-                  <TextField fx:id="pathFiled" />
-                  <Button fx:id="goButton" mnemonicParsing="false" text="go" />
-                  <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Label text="Buffer" />
-                  <ProgressBar fx:id="bufferBar" prefHeight="18.0" prefWidth="173.0" progress="0.0" />
-              </items>
-            </ToolBar>
-         </children></AnchorPane>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-         <children>
-            <ScrollPane fx:id="mainArea" layoutX="120.0" layoutY="46.0" prefHeight="200.0" prefWidth="347.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-         </children></AnchorPane>
+      <ToolBar fx:id="toolBar" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="598.0">
+        <items>
+            <TextField fx:id="pathFiled" />
+            <Button fx:id="goButton" mnemonicParsing="false" text="go" />
+            <Separator orientation="VERTICAL" prefHeight="200.0" />
+            <Label text="Buffer" />
+            <ProgressBar fx:id="bufferBar" prefHeight="18.0" prefWidth="173.0" progress="0.0" />
+        </items>
+      </ToolBar>
+      <ScrollPane fx:id="imageArea" prefHeight="200.0" prefWidth="200.0" />
   </items>
 </SplitPane>

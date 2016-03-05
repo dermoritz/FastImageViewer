@@ -9,6 +9,7 @@ import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.image.ImageProviderImpl;
 import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
 import javafx.scene.Parent;
+import javafx.scene.image.ImageView;
 
 public class DiModule extends AbstractModule {
 
@@ -25,12 +26,6 @@ public class DiModule extends AbstractModule {
         //
     }
 
-    @Provides
-    @Singleton
-    @Inject
-    public Parent getParent( MainLayout ml ) {
-        return ml.getRoot();
-    }
 
     @Provides
     @Singleton

@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -13,7 +14,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	private static Injector i;
-
+	private FXMLLoader fxmlLoader;
 	public static void main(String[] args) {
 		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "DEBUG");
 
@@ -24,15 +25,22 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
+		fxmlLoader = new FXMLLoader(getClass().getResource("/layout.fxml"));
+		MainController controller = i.getInstance(MainController.class);
+		fxmlLoader.setController(controller);
+
+
+
+		Scene scene = new Scene(fxmlLoader.load());
 		Screen screen = Screen.getPrimary();
 		Rectangle2D bounds = screen.getVisualBounds();
 		primaryStage.setX(0);
 		primaryStage.setY(0);
 		primaryStage.setWidth(bounds.getWidth());
 		primaryStage.setHeight(bounds.getHeight());
-		Scene scene = new Scene(i.getInstance(Parent.class));
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		controller.onReady();
 
 	}
 

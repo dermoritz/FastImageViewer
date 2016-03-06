@@ -8,6 +8,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,7 +29,7 @@ public class MainController implements Initializable {
     private SplitPane root;
 
     @FXML
-    private Pane imageArea;
+    private StackPane imageArea;
 
 
 
@@ -37,6 +38,7 @@ public class MainController implements Initializable {
     public MainController(ImageViewer imageView, ImageProvider ip) {
         this.ip = ip;
         this.imageView = imageView;
+
     }
 
     private void registerEvents() {
@@ -44,10 +46,10 @@ public class MainController implements Initializable {
         root.setOnScroll(this::handleScroll);
         root.heightProperty().addListener(this::handleResize);
         root.widthProperty().addListener(this::handleResize);
-        root.setOnMousePressed(imageView::handleMouseDown);
-        root.setOnMouseReleased((event) -> imageView.fitImage());
         root.setOnDragOver(this::dragOver);
         root.setOnDragDropped(this::dropFile);
+        imageArea.setOnMousePressed(imageView::handleMouseDown);
+        imageArea.setOnMouseReleased((event) -> imageView.fitImage());
     }
 
     @Override

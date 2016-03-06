@@ -10,6 +10,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 
@@ -28,9 +30,7 @@ public class Main extends Application {
 		fxmlLoader = new FXMLLoader(getClass().getResource("/layout.fxml"));
 		MainController controller = i.getInstance(MainController.class);
 		fxmlLoader.setController(controller);
-
-
-
+		primaryStage.setOnShown(event -> controller.onReady());
 		Scene scene = new Scene(fxmlLoader.load());
 		Screen screen = Screen.getPrimary();
 		Rectangle2D bounds = screen.getVisualBounds();
@@ -40,7 +40,6 @@ public class Main extends Application {
 		primaryStage.setHeight(bounds.getHeight());
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		controller.onReady();
 
 	}
 

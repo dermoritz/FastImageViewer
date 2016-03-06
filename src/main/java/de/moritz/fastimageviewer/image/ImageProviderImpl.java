@@ -43,7 +43,7 @@ public class ImageProviderImpl implements ImageProvider {
 				result.add(entry);
 			}
 		} catch (IOException ex) {
-			// I/O error encounted during the iteration, the cause is an
+			// I/O error encountered during the iteration, the cause is an
 			// IOException
 			throw new IllegalStateException("Problem on parsing folder: ", ex);
 		}

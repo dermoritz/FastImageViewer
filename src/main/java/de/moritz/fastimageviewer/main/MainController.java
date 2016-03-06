@@ -1,13 +1,16 @@
 package de.moritz.fastimageviewer.main;
 
 import de.moritz.fastimageviewer.image.ImageProvider;
+import de.moritz.fastimageviewer.image.ImageProviderImpl;
+import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 import javax.inject.Inject;
@@ -24,6 +27,7 @@ public class MainController implements Initializable {
 
     private final ImageViewer imageView;
     private final ImageProvider ip;
+    private final String[] args;
 
     @FXML
     private SplitPane root;
@@ -31,14 +35,35 @@ public class MainController implements Initializable {
     @FXML
     private StackPane imageArea;
 
+    @FXML
+    private Button goButton;
 
+    @FXML
+    private TextField pathField;
+
+    @FXML
+    private TextField filterField;
 
 
     @Inject
-    public MainController(ImageViewer imageView, ImageProvider ip) {
-        this.ip = ip;
+    public MainController(ImageViewer imageView, @DiModule.Args String[] args) {
+        this.args = args;
+        this.ip = getIp(args);
         this.imageView = imageView;
 
+    }
+
+    private ImageProvider getIp(String[] args) {
+        String startPath = args == null ? null : args[0];
+        if( startPath != null && startPath.toLowerCase().startsWith( "http" ) ) {
+            ImageServiceImageProvider imageService = new ImageServiceImageProvider(startPath);
+            if(args.length>1){
+                imageService.setPath(args[1]);
+            }
+            return imageService;
+        } else {
+            return new ImageProviderImpl( startPath );
+        }
     }
 
     private void registerEvents() {
@@ -56,10 +81,16 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         imageArea.getChildren().add(imageView.getImageView());
         registerEvents();
+        if(args.length>0){
+            pathField.setText(args[0]);
+        }
+        if(args.length>1){
+            filterField.setText(args[1]);
+        }
     }
 
     public void onReady(){
-        if(ip.hasNext()){
+        if(ip != null && ip.hasNext()){
             imageView.setImageAndFit(ip.next());
         }
     }

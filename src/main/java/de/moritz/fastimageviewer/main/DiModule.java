@@ -1,15 +1,18 @@
 package de.moritz.fastimageviewer.main;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-
 import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.image.ImageProviderImpl;
 import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
-import javafx.scene.Parent;
-import javafx.scene.image.ImageView;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 public class DiModule extends AbstractModule {
 
@@ -29,16 +32,13 @@ public class DiModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ImageProvider getImageProvider() {
-        if( startPath != null && startPath.toLowerCase().startsWith( "http" ) ) {
-            ImageServiceImageProvider imageService = new ImageServiceImageProvider(startPath);
-            if(args.length>1){
-                imageService.setPath(args[1]);
-            }
-            return imageService;
-        } else {
-            return new ImageProviderImpl( startPath );
-        }
+    @Args
+    public String[] getArgs(){
+        return args;
     }
+
+    @BindingAnnotation
+    @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+    public @interface Args {}
 
 }

@@ -13,7 +13,9 @@
   <items>
       <ToolBar fx:id="toolBar" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="598.0">
         <items>
-            <TextField fx:id="pathFiled" />
+            <TextField fx:id="pathField" />
+            <Label text="/" />
+            <TextField fx:id="filterField" />
             <Button fx:id="goButton" mnemonicParsing="false" text="go" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
             <Label text="Buffer" />

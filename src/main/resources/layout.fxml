@@ -3,11 +3,11 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.Pane?>
 
 <SplitPane fx:id="root" dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
   <items>
@@ -20,6 +20,6 @@
             <ProgressBar fx:id="bufferBar" prefHeight="18.0" prefWidth="173.0" progress="0.0" />
         </items>
       </ToolBar>
-      <ScrollPane fx:id="imageArea" prefHeight="200.0" prefWidth="200.0" />
+      <Pane fx:id="imageArea" prefHeight="200.0" prefWidth="200.0" />
   </items>
 </SplitPane>

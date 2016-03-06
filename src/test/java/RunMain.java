@@ -1,4 +1,3 @@
-import com.google.common.annotations.VisibleForTesting;
 import de.moritz.fastimageviewer.main.Main;
 import org.junit.Test;
 

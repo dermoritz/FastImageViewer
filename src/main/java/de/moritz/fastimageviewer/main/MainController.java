@@ -4,8 +4,10 @@ import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.image.ImageProviderImpl;
 import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SplitPane;
@@ -13,9 +15,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -25,9 +32,8 @@ import java.util.ResourceBundle;
 @Singleton
 public class MainController implements Initializable {
 
-
     private final ImageViewer imageView;
-    private final ImageProvider ip;
+    private ImageProvider ip;
     private final String[] args;
 
     @FXML
@@ -47,35 +53,43 @@ public class MainController implements Initializable {
 
     @FXML
     private volatile ProgressBar bufferBar;
-
+    private String startPath;
+    private String subPath;
+    private boolean webserviceMode;
 
     @Inject
     public MainController(ImageViewer imageView, @DiModule.Args String[] args) {
         this.args = args;
         this.ip = getIp(args);
         this.imageView = imageView;
-        this.ip.setBufferChangeCallback(this::updateBuffer);
     }
 
-    private void updateBuffer(BufferState state){
+    private void updateBuffer(BufferState state) {
         bufferBar.setProgress(state.getForward());
     }
 
     private ImageProvider getIp(String[] args) {
-        String startPath = args == null ? null : args[0];
-        if( startPath != null && startPath.toLowerCase().startsWith( "http" ) ) {
-            ImageServiceImageProvider imageService = new ImageServiceImageProvider(startPath);
-            if(args.length>1){
-                imageService.setPath(args[1]);
+        startPath = args == null ? null : args[0];
+        subPath = null;
+        ImageProvider ip = null;
+        if (startPath != null && startPath.toLowerCase().startsWith("http")) {
+            webserviceMode = true;
+            ip = new ImageServiceImageProvider(startPath);
+            if (args.length > 1 && !Strings.isNullOrEmpty(args[1])) {
+                subPath = args[1];
+                ip.setPath(subPath);
             }
-            return imageService;
         } else {
-            return new ImageProviderImpl( startPath );
+            webserviceMode = false;
+            ip = new ImageProviderImpl(startPath);
         }
+        ip.setBufferChangeCallback(this::updateBuffer);
+        ip.setInfoCallBack(this::setTitle);
+        return ip;
     }
 
     private void registerEvents() {
-        root.setOnKeyPressed(this::pageKey);
+        root.addEventFilter(KeyEvent.KEY_PRESSED, this::pageKey);
         root.setOnScroll(this::handleScroll);
         root.heightProperty().addListener(this::handleResize);
         root.widthProperty().addListener(this::handleResize);
@@ -83,37 +97,56 @@ public class MainController implements Initializable {
         root.setOnDragDropped(this::dropFile);
         imageArea.setOnMousePressed(imageView::handleMouseDown);
         imageArea.setOnMouseReleased((event) -> imageView.fitImage());
+        goButton.setOnAction(this::handlePathChanged);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         imageArea.getChildren().add(imageView.getImageView());
         registerEvents();
-        if(args.length>0){
+        if (args.length > 0) {
             pathField.setText(args[0]);
         }
-        if(args.length>1){
-            filterField.setText(args[1]);
+        if (args.length > 1) {
+            filterField.setText(args[1].replaceFirst("/", ""));
         }
     }
 
-    public void onReady(){
-        if(ip != null && ip.hasNext()){
+    public void onReady() {
+        if (ip != null && ip.hasNext()) {
             imageView.setImageAndFit(ip.next());
         }
     }
 
-    public void pageKey(KeyEvent event){
-        if(event.getCode() == KeyCode.PAGE_UP){
+    private void handlePathChanged(ActionEvent event) {
+        String newFilter = filterField.getText();
+        if(!Strings.isNullOrEmpty(newFilter) && !newFilter.startsWith("/")){
+            newFilter = "/"+newFilter;
+        }
+        if (!pathField.getText().equals(startPath)) {
+            ip=getIp(new String[]{pathField.getText(),newFilter});
+            imageView.setImageAndFit(ip.next());
+        } else if(!newFilter.equals(subPath) && webserviceMode){
+            ip.setPath(newFilter);
+            imageView.setImageAndFit(ip.next());
+        }
+    }
+
+    private void pageKey(KeyEvent event) {
+        if (event.getCode() == KeyCode.PAGE_UP) {
             imageView.setImageAndFit(ip.prev());
             event.consume();
-        } else if(event.getCode() == KeyCode.PAGE_DOWN){
+        } else if (event.getCode() == KeyCode.PAGE_DOWN) {
             imageView.setImageAndFit(ip.next());
             event.consume();
         }
     }
 
-    public void dragOver(DragEvent event) {
+    private void setTitle(String title){
+        ((Stage)root.getScene().getWindow()).setTitle(title);
+    }
+
+    private void dragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasFiles()) {
             event.acceptTransferModes(TransferMode.LINK);
@@ -122,7 +155,7 @@ public class MainController implements Initializable {
         }
     }
 
-    public void dropFile(DragEvent event) {
+    private void dropFile(DragEvent event) {
         Dragboard db = event.getDragboard();
         boolean success = false;
         if (db.hasFiles() && db.getFiles().size() > 0) {
@@ -134,7 +167,7 @@ public class MainController implements Initializable {
         event.consume();
     }
 
-    public void handleScroll(ScrollEvent event) {
+    private void handleScroll(ScrollEvent event) {
         double deltaY = event.getDeltaY();
         event.consume();
         if (deltaY < 0) {
@@ -144,7 +177,7 @@ public class MainController implements Initializable {
         }
     }
 
-    public void handleResize(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+    private void handleResize(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         imageView.fitImage();
     }
 

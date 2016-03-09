@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class ImageProviderImpl implements ImageProvider {
     private static final Logger LOG = LoggerFactory.getLogger(ImageProviderImpl.class);
     private CompletableFuture<Integer> updateBufferTask;
     private BufferStateCallback bufferStateCallback;
+    private Consumer<String> infoConsumer;
 
     public ImageProviderImpl(String path) {
         if (path != null) {
@@ -80,7 +82,9 @@ public class ImageProviderImpl implements ImageProvider {
             updateBuffer(index);
             return 1;
         });
-
+        if(infoConsumer!=null){
+            infoConsumer.accept(String.valueOf(image.getWidth()) + "x" + String.valueOf(image.getHeight()));
+        }
         return image;
 
     }
@@ -197,6 +201,11 @@ public class ImageProviderImpl implements ImageProvider {
     @Override
     public void setBufferChangeCallback(BufferStateCallback state) {
         this.bufferStateCallback = state;
+    }
+
+    @Override
+    public void setInfoCallBack(Consumer<String> infoConsumer) {
+        this.infoConsumer = infoConsumer;
     }
 
 }

@@ -1,6 +1,7 @@
 package de.moritz.fastimageviewer.image;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 import de.moritz.fastimageviewer.main.BufferStateCallback;
 import javafx.scene.image.Image;
@@ -46,4 +47,7 @@ public interface ImageProvider extends Iterator<Image> {
 	 * @param state callback
 	 */
 	void setBufferChangeCallback(BufferStateCallback state);
+
+
+	void setInfoCallBack(Consumer<String> infoConsumer);
 }

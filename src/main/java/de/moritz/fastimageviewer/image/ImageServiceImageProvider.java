@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.common.base.Stopwatch;
 
 import de.moritz.fastimageviewer.main.BufferState;
 import de.moritz.fastimageviewer.main.BufferStateCallback;
@@ -31,15 +33,18 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     private static final String NEXT = "/next";
     private static final Logger LOG = LoggerFactory.getLogger(ImageServiceImageProvider.class);
+    private static final int BUFFER_SIZE = 10;
+    private static final int HISTORY_BUFFER_SIZE = 5;
+    private static final int LOAD_TIME_OUT_SECONDS = 10;
+
     private final HttpRequestFactory requestFactory;
     private final GenericUrl baseUrl;
     private String user;
     private String pass;
-    private volatile ConcurrentLinkedDeque<Image> buffer = new ConcurrentLinkedDeque<>();
-    private static final int BUFFER_SIZE = 10;
 
+    private volatile ConcurrentLinkedDeque<Image> buffer = new ConcurrentLinkedDeque<>();
     private volatile List<Image> historyBuffer = new ArrayList<>();
-    private static final int HISTORY_BUFFER_SIZE = 5;
+
     /**
      * Current position in history
      */
@@ -88,13 +93,19 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     @Override
     public Image getImage() {
+        Stopwatch createStarted = Stopwatch.createStarted();
         fillBufferAsync();
         while (buffer.size() < 1) {
-            LOG.debug("Buffer is empty.. waiting");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                throw new IllegalStateException("Problem on sleeping!?: ", e);
+            if (createStarted.elapsed(TimeUnit.SECONDS) <= LOAD_TIME_OUT_SECONDS) {
+                LOG.debug("Buffer is empty.. waiting");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new IllegalStateException("Problem on sleeping!?: ", e);
+                }
+            } else {
+                LOG.debug("Timeout reached for try again...");
+                return null;
             }
         }
         Image poll = buffer.poll();
@@ -143,7 +154,7 @@ public class ImageServiceImageProvider implements ImageProvider {
         LOG.debug("buffer full");
     }
 
-    private void callBackBufferState(){
+    private void callBackBufferState() {
         if (bufferStateCallback != null) {
             bufferStateCallback.state(new BufferState((double) buffer.size() / BUFFER_SIZE,
                                                       (double) historyBuffer.size() / HISTORY_BUFFER_SIZE));

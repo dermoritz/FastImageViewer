@@ -47,7 +47,4 @@ public interface ImageProvider extends Iterator<Image> {
 	 * @param state callback
 	 */
 	void setBufferChangeCallback(BufferStateCallback state);
-
-
-	void setInfoCallBack(Consumer<String> infoConsumer);
 }

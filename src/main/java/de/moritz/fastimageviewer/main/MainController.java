@@ -84,7 +84,6 @@ public class MainController implements Initializable {
             ip = new ImageProviderImpl(startPath);
         }
         ip.setBufferChangeCallback(this::updateBuffer);
-        ip.setInfoCallBack(this::setTitle);
         return ip;
     }
 
@@ -140,10 +139,6 @@ public class MainController implements Initializable {
             imageView.setImageAndFit(ip.next());
             event.consume();
         }
-    }
-
-    private void setTitle(String title){
-        ((Stage)root.getScene().getWindow()).setTitle(title);
     }
 
     private void dragOver(DragEvent event) {

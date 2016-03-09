@@ -62,7 +62,6 @@ public class ImageServiceImageProvider implements ImageProvider {
     private String currentPath;
     private volatile CompletableFuture<Void> bufferTask;
     private BufferStateCallback bufferStateCallback;
-    private Consumer<String> infoConsumer;
 
     public ImageServiceImageProvider(String serviceUrl) {
         LOG.debug("ImageService provider started with base url " + serviceUrl);
@@ -120,9 +119,6 @@ public class ImageServiceImageProvider implements ImageProvider {
         }
         Image poll = buffer.poll();
         addToHistory(poll);
-        if (infoConsumer != null && poll != null) {
-            infoConsumer.accept(getTextFromResource(INFO));
-        }
         return poll;
     }
 
@@ -152,34 +148,6 @@ public class ImageServiceImageProvider implements ImageProvider {
         } catch (IOException e) {
             LOG.debug("Can't receive image: " + e.getMessage());
             return null;
-        }
-    }
-
-    private String getTextFromResource(String path) {
-        baseUrl.setRawPath(path);
-        Scanner s = null;
-        try {
-            LOG.debug("Loading image from " + baseUrl);
-            HttpRequest request = requestFactory.buildGetRequest(baseUrl);
-            if (user != null) {
-                request.getHeaders().setBasicAuthentication(user, pass);
-            }
-            HttpResponse response = request.execute();
-            if (MediaType.parse(response.getContentType()).is(MediaType.ANY_TEXT_TYPE)) {
-                s = new Scanner(response.getContent());
-                s.useDelimiter("\\A");
-                String out = s.hasNext() ? s.next() : "";
-                s.close();
-                return out;
-            }
-            return null;
-        } catch (IOException e) {
-            LOG.debug("Can't receive image: " + e.getMessage());
-            return null;
-        } finally {
-            if (s != null) {
-                s.close();
-            }
         }
     }
 
@@ -239,10 +207,5 @@ public class ImageServiceImageProvider implements ImageProvider {
     @Override
     public void setBufferChangeCallback(BufferStateCallback state) {
         this.bufferStateCallback = state;
-    }
-
-    @Override
-    public void setInfoCallBack(Consumer<String> infoConsumer) {
-        this.infoConsumer = infoConsumer;
     }
 }

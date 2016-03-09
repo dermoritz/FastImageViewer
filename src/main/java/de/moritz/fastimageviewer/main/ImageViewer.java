@@ -1,18 +1,14 @@
 package de.moritz.fastimageviewer.main;
 
 import com.google.inject.Inject;
-import javafx.beans.property.ReadOnlyDoubleProperty;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ImageViewer extends ImageView {
 
-
-    private static final Logger LOG = LoggerFactory.getLogger(ImageViewer.class);
 
     @Inject
     private ImageViewer() {
@@ -27,7 +23,7 @@ public class ImageViewer extends ImageView {
         fitImage();
     }
 
-    
+
     public ImageView getImageView(){
         return this;
     }

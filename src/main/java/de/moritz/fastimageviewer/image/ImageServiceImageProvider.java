@@ -17,6 +17,8 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
+import de.moritz.fastimageviewer.main.BufferState;
+import de.moritz.fastimageviewer.main.BufferStateCallback;
 import javafx.scene.image.Image;
 
 /**
@@ -46,6 +48,7 @@ public class ImageServiceImageProvider implements ImageProvider {
     private static final String PREV = "/prev/" + BUFFER_SIZE;
     private String currentPath;
     private volatile CompletableFuture<Void> bufferTask;
+    private BufferStateCallback bufferStateCallback;
 
     public ImageServiceImageProvider(String serviceUrl) {
         LOG.debug("ImageService provider started with base url " + serviceUrl);
@@ -69,9 +72,9 @@ public class ImageServiceImageProvider implements ImageProvider {
     @Override
     public Image prev() {
         Image result = null;
-        if(--historyIndex >=0){
+        if (--historyIndex >= 0) {
             result = historyBuffer.get(historyIndex);
-        } else if (historyBuffer.size()>0) {
+        } else if (historyBuffer.size() > 0) {
             LOG.debug("reached end of history.");
             result = historyBuffer.get(0);
         }
@@ -98,14 +101,15 @@ public class ImageServiceImageProvider implements ImageProvider {
         addToHistory(poll);
         return poll;
     }
-    
-    private void addToHistory(Image image){
+
+    private void addToHistory(Image image) {
         historyBuffer.add(image);
-        if(historyBuffer.size()>HISTORY_BUFFER_SIZE){
+        if (historyBuffer.size() > HISTORY_BUFFER_SIZE) {
             LOG.debug("revoving first image from history buffer.");
             historyBuffer.remove(0);
         }
-        historyIndex = historyBuffer.size()-1;
+        historyIndex = historyBuffer.size() - 1;
+        callBackBufferState();
     }
 
     private Image getImageFromResource(String path) {
@@ -134,8 +138,16 @@ public class ImageServiceImageProvider implements ImageProvider {
         while (buffer.size() < BUFFER_SIZE) {
             buffer.offerFirst(getImageFromResource(currentPath));
             LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
+            callBackBufferState();
         }
         LOG.debug("buffer full");
+    }
+
+    private void callBackBufferState(){
+        if (bufferStateCallback != null) {
+            bufferStateCallback.state(new BufferState((double) buffer.size() / BUFFER_SIZE,
+                                                      (double) historyBuffer.size() / HISTORY_BUFFER_SIZE));
+        }
     }
 
     @Override
@@ -156,5 +168,10 @@ public class ImageServiceImageProvider implements ImageProvider {
     @Override
     public Image next() {
         return getImage();
+    }
+
+    @Override
+    public void setBufferChangeCallback(BufferStateCallback state) {
+        this.bufferStateCallback = state;
     }
 }

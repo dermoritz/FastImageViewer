@@ -7,6 +7,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -44,13 +45,20 @@ public class MainController implements Initializable {
     @FXML
     private TextField filterField;
 
+    @FXML
+    private volatile ProgressBar bufferBar;
+
 
     @Inject
     public MainController(ImageViewer imageView, @DiModule.Args String[] args) {
         this.args = args;
         this.ip = getIp(args);
         this.imageView = imageView;
+        this.ip.setBufferChangeCallback(this::updateBuffer);
+    }
 
+    private void updateBuffer(BufferState state){
+        bufferBar.setProgress(state.getForward());
     }
 
     private ImageProvider getIp(String[] args) {

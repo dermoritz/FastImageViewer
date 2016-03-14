@@ -1,30 +1,37 @@
 package de.moritz.fastimageviewer.main;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import com.google.common.base.Strings;
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import de.moritz.fastimageviewer.image.ImageProvider;
-import de.moritz.fastimageviewer.image.ImageProviderImpl;
+import de.moritz.fastimageviewer.image.FileImageProvider;
+import de.moritz.fastimageviewer.image.FileImageProvider.Inst;
 import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.*;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import javafx.stage.Window;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.api.client.repackaged.com.google.common.base.Strings;
-
-import java.net.URL;
-import java.util.ResourceBundle;
+import de.moritz.fastimageviewer.main.DiModule.Args;
 
 /**
  * Created by moritz on 05.03.2016.
@@ -56,20 +63,24 @@ public class MainController implements Initializable {
     private String startPath;
     private String subPath;
     private boolean webserviceMode;
+    private Inst fileImageProviderFactory;
 
     @Inject
-    public MainController(ImageViewer imageView, @DiModule.Args String[] args) {
+    public MainController(ImageViewer imageView, @Args String[] args,
+                          FileImageProvider.Inst fileImageProviderFactory) {
         this.args = args;
+        this.fileImageProviderFactory = fileImageProviderFactory;
         this.ip = getIp(args);
         this.imageView = imageView;
     }
 
-    private void updateBuffer(BufferState state) {
+    @Subscribe
+    public void updateBuffer(BufferState state) {
         bufferBar.setProgress(state.getForward());
     }
 
     private ImageProvider getIp(String[] args) {
-        startPath = args == null ? null : args[0];
+        startPath = args == null || args.length < 1 ? null : args[0];
         subPath = null;
         ImageProvider ip = null;
         if (startPath != null && startPath.toLowerCase().startsWith("http")) {
@@ -81,9 +92,8 @@ public class MainController implements Initializable {
             }
         } else {
             webserviceMode = false;
-            ip = new ImageProviderImpl(startPath);
+            ip = fileImageProviderFactory.get(startPath);
         }
-        ip.setBufferChangeCallback(this::updateBuffer);
         return ip;
     }
 
@@ -119,13 +129,13 @@ public class MainController implements Initializable {
 
     private void handlePathChanged(ActionEvent event) {
         String newFilter = filterField.getText();
-        if(!Strings.isNullOrEmpty(newFilter) && !newFilter.startsWith("/")){
-            newFilter = "/"+newFilter;
+        if (!Strings.isNullOrEmpty(newFilter) && !newFilter.startsWith("/")) {
+            newFilter = "/" + newFilter;
         }
         if (!pathField.getText().equals(startPath)) {
-            ip=getIp(new String[]{pathField.getText(),newFilter});
+            ip = getIp(new String[] {pathField.getText(), newFilter});
             imageView.setImageAndFit(ip.next());
-        } else if(!newFilter.equals(subPath) && webserviceMode){
+        } else if (!newFilter.equals(subPath) && webserviceMode) {
             ip.setPath(newFilter);
             imageView.setImageAndFit(ip.next());
         }

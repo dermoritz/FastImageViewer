@@ -1,12 +1,10 @@
 package de.moritz.fastimageviewer.image;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -16,17 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpMediaType;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Stopwatch;
 import com.google.common.net.MediaType;
 
 import de.moritz.fastimageviewer.main.BufferState;
-import de.moritz.fastimageviewer.main.BufferStateCallback;
 import javafx.scene.image.Image;
 
 /**
@@ -61,7 +56,6 @@ public class ImageServiceImageProvider implements ImageProvider {
     private static final String PREV = "/prev/" + BUFFER_SIZE;
     private String currentPath;
     private volatile CompletableFuture<Void> bufferTask;
-    private BufferStateCallback bufferStateCallback;
 
     public ImageServiceImageProvider(String serviceUrl) {
         LOG.debug("ImageService provider started with base url " + serviceUrl);
@@ -129,7 +123,6 @@ public class ImageServiceImageProvider implements ImageProvider {
             historyBuffer.remove(0);
         }
         historyIndex = historyBuffer.size() - 1;
-        callBackBufferState();
     }
 
     private Image getImageFromResource(String path) {
@@ -164,7 +157,6 @@ public class ImageServiceImageProvider implements ImageProvider {
             if (image != null) {
                 buffer.offerFirst(image);
                 LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
-                callBackBufferState();
             } else {
                 noImageFound = true;
                 LOG.debug("no image found, change url...");
@@ -172,13 +164,6 @@ public class ImageServiceImageProvider implements ImageProvider {
             }
         }
         LOG.debug("buffer full");
-    }
-
-    private void callBackBufferState() {
-        if (bufferStateCallback != null) {
-            bufferStateCallback.state(new BufferState((double) buffer.size() / BUFFER_SIZE,
-                                                      (double) historyBuffer.size() / HISTORY_BUFFER_SIZE));
-        }
     }
 
     @Override
@@ -202,10 +187,5 @@ public class ImageServiceImageProvider implements ImageProvider {
     @Override
     public Image next() {
         return getImage();
-    }
-
-    @Override
-    public void setBufferChangeCallback(BufferStateCallback state) {
-        this.bufferStateCallback = state;
     }
 }

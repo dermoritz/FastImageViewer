@@ -8,8 +8,8 @@ public class RunMain {
 
     @Test
     public void runMainOnImageService(){
+        Main.main(new String[]{});
         //Main.main(new String[]{"http://user1:0ljLYTheARvcMEbAmhEB@server:8082"});
-        Main.main(new String[]{"http://user1:0ljLYTheARvcMEbAmhEB@server:8082"});
     }
 
 

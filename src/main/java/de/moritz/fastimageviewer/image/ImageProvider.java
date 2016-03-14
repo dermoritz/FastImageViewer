@@ -3,7 +3,7 @@ package de.moritz.fastimageviewer.image;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-import de.moritz.fastimageviewer.main.BufferStateCallback;
+import de.moritz.fastimageviewer.main.BufferState;
 import javafx.scene.image.Image;
 
 public interface ImageProvider extends Iterator<Image> {
@@ -41,10 +41,4 @@ public interface ImageProvider extends Iterator<Image> {
 	 *            will be available
 	 */
 	void setPath(String path);
-
-	/**
-	 * Sets call back to report buffer state.
-	 * @param state callback
-	 */
-	void setBufferChangeCallback(BufferStateCallback state);
 }

@@ -69,6 +69,7 @@ public class ImageBuffer {
             if (i < left || i > right) {
                 LOG.debug("Removing image " + i + " from buffer.");
                 imageBuffer.remove(i);
+                //updateBufferState(index);
             }
         }
         // add all that are not in buff but in range
@@ -76,12 +77,12 @@ public class ImageBuffer {
             if (imageBuffer.get(i) == null) {
                 imageBuffer.put(i, loadImage.apply(i));
                 LOG.debug("image " + i + " loaded into buffer.");
+                updateBufferState(index);
             }
         }
-        callBackBufferState(index);
     }
 
-    private void callBackBufferState(int index) {
+    private void updateBufferState(int index) {
         // backward buffer
         int backBufferCount = 0;
         for (int i = index-1; i > index - backward; i--) {

@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import de.moritz.fastimageviewer.main.BufferState;
 import javafx.scene.image.Image;
 
 public class FileImageProvider implements ImageProvider {

@@ -19,7 +19,10 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.base.Stopwatch;
+import com.google.common.eventbus.EventBus;
 import com.google.common.net.MediaType;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import de.moritz.fastimageviewer.main.BufferState;
 import javafx.scene.image.Image;
@@ -56,8 +59,11 @@ public class ImageServiceImageProvider implements ImageProvider {
     private static final String PREV = "/prev/" + BUFFER_SIZE;
     private String currentPath;
     private volatile CompletableFuture<Void> bufferTask;
+    private EventBus eventBus;
 
-    public ImageServiceImageProvider(String serviceUrl) {
+    @Inject
+    private ImageServiceImageProvider(@Assisted String serviceUrl, EventBus eventBus) {
+        this.eventBus = eventBus;
         LOG.debug("ImageService provider started with base url " + serviceUrl);
         requestFactory = new NetHttpTransport().createRequestFactory();
         try {
@@ -123,6 +129,7 @@ public class ImageServiceImageProvider implements ImageProvider {
             historyBuffer.remove(0);
         }
         historyIndex = historyBuffer.size() - 1;
+        callBackBufferState();
     }
 
     private Image getImageFromResource(String path) {
@@ -157,6 +164,7 @@ public class ImageServiceImageProvider implements ImageProvider {
             if (image != null) {
                 buffer.offerFirst(image);
                 LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
+                callBackBufferState();
             } else {
                 noImageFound = true;
                 LOG.debug("no image found, change url...");
@@ -188,4 +196,14 @@ public class ImageServiceImageProvider implements ImageProvider {
     public Image next() {
         return getImage();
     }
+
+    private void callBackBufferState() {
+        eventBus.post(new BufferState((double) buffer.size() / BUFFER_SIZE,
+                                      (double) historyBuffer.size() / HISTORY_BUFFER_SIZE));
+    }
+
+    public interface Inst {
+        ImageServiceImageProvider get(@Assisted String serviceUrl);
+    }
+
 }

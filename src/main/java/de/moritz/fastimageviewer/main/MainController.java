@@ -64,12 +64,14 @@ public class MainController implements Initializable {
     private String subPath;
     private boolean webserviceMode;
     private Inst fileImageProviderFactory;
+    private de.moritz.fastimageviewer.image.ImageServiceImageProvider.Inst serviceImageProviderFactory;
 
     @Inject
-    public MainController(ImageViewer imageView, @Args String[] args,
-                          FileImageProvider.Inst fileImageProviderFactory) {
+    public MainController(ImageViewer imageView, @Args String[] args, FileImageProvider.Inst fileImageProviderFactory,
+                          ImageServiceImageProvider.Inst serviceImageProviderFactory) {
         this.args = args;
         this.fileImageProviderFactory = fileImageProviderFactory;
+        this.serviceImageProviderFactory = serviceImageProviderFactory;
         this.ip = getIp(args);
         this.imageView = imageView;
     }
@@ -85,7 +87,7 @@ public class MainController implements Initializable {
         ImageProvider ip = null;
         if (startPath != null && startPath.toLowerCase().startsWith("http")) {
             webserviceMode = true;
-            ip = new ImageServiceImageProvider(startPath);
+            ip = serviceImageProviderFactory.get(startPath);
             if (args.length > 1 && !Strings.isNullOrEmpty(args[1])) {
                 subPath = args[1];
                 ip.setPath(subPath);

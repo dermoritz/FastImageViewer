@@ -23,6 +23,7 @@ import com.google.inject.spi.TypeListener;
 import de.moritz.fastimageviewer.image.FileImageProvider;
 import de.moritz.fastimageviewer.image.ImageBuffer;
 import de.moritz.fastimageviewer.image.ImageProvider;
+import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
 
 public class DiModule extends AbstractModule {
 
@@ -38,6 +39,8 @@ public class DiModule extends AbstractModule {
     protected void configure() {
         install(new FactoryModuleBuilder().implement(ImageBuffer.class, ImageBuffer.class)
                                           .build(ImageBuffer.Inst.class));
+        install(new FactoryModuleBuilder().implement(ImageProvider.class, ImageServiceImageProvider.class)
+                                          .build(ImageServiceImageProvider.Inst.class));
         install(new FactoryModuleBuilder().implement(ImageProvider.class, FileImageProvider.class)
                                           .build(FileImageProvider.Inst.class));
         bind(EventBus.class).toInstance(eventBus);

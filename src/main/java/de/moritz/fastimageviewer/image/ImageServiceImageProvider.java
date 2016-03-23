@@ -200,6 +200,7 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     private int readIntFromUrl(GenericUrl url) {
         int result = 0;
+        LOG.debug("Trying to retrieve int from: " + url);
         try {
             HttpRequest request = requestFactory.buildGetRequest(url);
             setAuth(request);
@@ -232,7 +233,7 @@ public class ImageServiceImageProvider implements ImageProvider {
     }
 
     private int updateMaxIndexForFilter(String path) {
-        baseUrl.setRawPath(path);
+        baseUrl.setRawPath(path + INFO);
         return readIntFromUrl(baseUrl);
     }
 

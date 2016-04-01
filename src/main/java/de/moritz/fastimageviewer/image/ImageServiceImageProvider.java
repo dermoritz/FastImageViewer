@@ -143,19 +143,19 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     private Image getImageFromResource(String path) {
         baseUrl.setRawPath(path);
+        Image image = null;
         try {
             LOG.debug("Loading image from " + baseUrl);
             HttpRequest request = requestFactory.buildGetRequest(baseUrl);
             setAuth(request);
             HttpResponse response = request.execute();
             if (MediaType.parse(response.getContentType()).is(MediaType.ANY_IMAGE_TYPE)) {
-                return new Image(response.getContent());
+                image = new Image(response.getContent());
             }
-            return null;
         } catch (IOException e) {
             LOG.debug("Can't receive image: " + e.getMessage());
-            return null;
         }
+        return image;
     }
 
     private void setAuth(HttpRequest request) {
@@ -173,7 +173,7 @@ public class ImageServiceImageProvider implements ImageProvider {
     private void fillBuffer() {
         String path = INDEX_PATH;
         if (filterPath != null) {
-            path = filterPath;
+            path = INDEX_FILTER_PATH + "" + filterPath;
         }
         LOG.debug("Filling buffer...");
         while (buffer.size() < BUFFER_SIZE) {

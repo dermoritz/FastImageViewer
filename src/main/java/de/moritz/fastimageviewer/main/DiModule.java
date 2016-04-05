@@ -20,10 +20,13 @@ import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 
-import de.moritz.fastimageviewer.image.FileImageProvider;
-import de.moritz.fastimageviewer.image.ImageBuffer;
 import de.moritz.fastimageviewer.image.ImageProvider;
-import de.moritz.fastimageviewer.image.ImageServiceImageProvider;
+import de.moritz.fastimageviewer.image.file.FileImageProvider;
+import de.moritz.fastimageviewer.image.file.ImageBuffer;
+import de.moritz.fastimageviewer.image.imageservice.ImageServiceApi;
+import de.moritz.fastimageviewer.image.imageservice.ImageServiceApiFactory;
+import de.moritz.fastimageviewer.image.imageservice.ImageServiceApiImpl;
+import de.moritz.fastimageviewer.image.imageservice.ImageServiceImageProvider;
 
 public class DiModule extends AbstractModule {
 
@@ -43,6 +46,8 @@ public class DiModule extends AbstractModule {
                                           .build(ImageServiceImageProvider.Inst.class));
         install(new FactoryModuleBuilder().implement(ImageProvider.class, FileImageProvider.class)
                                           .build(FileImageProvider.Inst.class));
+        install(new FactoryModuleBuilder().implement(ImageServiceApi.class, ImageServiceApiImpl.class)
+                                          .build(ImageServiceApiFactory.class));
         bind(EventBus.class).toInstance(eventBus);
         bindListener(Matchers.any(), new TypeListener() {
 

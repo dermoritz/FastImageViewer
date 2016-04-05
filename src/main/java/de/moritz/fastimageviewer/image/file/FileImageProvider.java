@@ -1,4 +1,4 @@
-package de.moritz.fastimageviewer.image;
+package de.moritz.fastimageviewer.image.file;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import de.moritz.fastimageviewer.image.ImageProvider;
 import javafx.scene.image.Image;
 
 public class FileImageProvider implements ImageProvider {
@@ -145,6 +146,11 @@ public class FileImageProvider implements ImageProvider {
 
     public interface Inst{
         FileImageProvider get(@Assisted String path);
+    }
+
+    @Override
+    public String getInfoForLast() {
+        return "to be implemented.";
     }
 
 }

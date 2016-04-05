@@ -1,9 +1,5 @@
-package de.moritz.fastimageviewer.image;
+package de.moritz.fastimageviewer.image.imageservice;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +11,12 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.base.Stopwatch;
 import com.google.common.eventbus.EventBus;
-import com.google.common.io.CharStreams;
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.main.BufferState;
 import javafx.scene.image.Image;
 
@@ -38,25 +28,15 @@ import javafx.scene.image.Image;
  */
 public class ImageServiceImageProvider implements ImageProvider {
 
-    private static final String INFO = "/info";
-    private static final String NEXT = "/next";
-
-    private static final String INDEX_PATH = "/index";
-    private static final String INDEX_FILTER_PATH = "/indexFilter";
-    private static final String INDEX_INFO_PATH = "/indexInfo";
-
     private static final Logger LOG = LoggerFactory.getLogger(ImageServiceImageProvider.class);
     private static final int BUFFER_SIZE = 10;
     private static final int HISTORY_BUFFER_SIZE = 5;
     private static final int LOAD_TIME_OUT_SECONDS = 10;
     private Random random = new SecureRandom();
-    private final HttpRequestFactory requestFactory;
-    private final GenericUrl baseUrl;
-    private String user;
-    private String pass;
 
-    private volatile ConcurrentLinkedDeque<Image> buffer = new ConcurrentLinkedDeque<>();
-    private volatile List<Image> historyBuffer = new ArrayList<>();
+    private volatile ConcurrentLinkedDeque<ImageWithId> buffer = new ConcurrentLinkedDeque<>();
+    private volatile List<ImageWithId> historyBuffer = new ArrayList<>();
+    private volatile ImageServiceImageId currentImage;
     private volatile boolean noImageFound = false;
 
     /**
@@ -64,43 +44,37 @@ public class ImageServiceImageProvider implements ImageProvider {
      */
     private int historyIndex = 0;
 
-    private static final String PREV = "/prev/" + BUFFER_SIZE;
     private String filterPath;
     private volatile CompletableFuture<Void> bufferTask;
     private EventBus eventBus;
     private int maxIndex;
 
+    private ImageServiceApi imageService;
+
     @Inject
-    private ImageServiceImageProvider(@Assisted String serviceUrl, EventBus eventBus) {
+    private ImageServiceImageProvider(@Assisted String serviceUrl, EventBus eventBus, ImageServiceApiFactory imageService) {
         this.eventBus = eventBus;
+        this.imageService = imageService.get(serviceUrl);
         LOG.debug("ImageService provider started with base url " + serviceUrl);
-        requestFactory = new NetHttpTransport().createRequestFactory();
-        try {
-            baseUrl = new GenericUrl(new URL(serviceUrl));
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Problem parsing url: " + serviceUrl + " cause: ", e);
-        }
-        String userInfo = baseUrl.getUserInfo();
-        if (userInfo != null) {
-            String[] userPass = userInfo.split(":");
-            user = userPass[0];
-            pass = userPass[1];
-            LOG.debug("Credentials detected: " + user + ":" + pass);
-        }
         maxIndex = getMaxIndex();
         fillBufferAsync();
     }
 
     @Override
     public Image prev() {
-        Image result = null;
+        ImageWithId result = null;
         if (--historyIndex >= 0) {
             result = historyBuffer.get(historyIndex);
         } else if (historyBuffer.size() > 0) {
             LOG.debug("reached end of history.");
             result = historyBuffer.get(0);
         }
-        return result;
+        if(result!=null){
+            currentImage = result.getId();
+            return result.getImage();
+        }else {
+            return null;
+        }
     }
 
     @Override
@@ -126,12 +100,13 @@ public class ImageServiceImageProvider implements ImageProvider {
                 return null;
             }
         }
-        Image poll = buffer.poll();
+        ImageWithId poll = buffer.poll();
         addToHistory(poll);
-        return poll;
+        currentImage = poll.getId();
+        return poll.getImage();
     }
 
-    private void addToHistory(Image image) {
+    private void addToHistory(ImageWithId image) {
         historyBuffer.add(image);
         if (historyBuffer.size() > HISTORY_BUFFER_SIZE) {
             LOG.debug("revoving first image from history buffer.");
@@ -141,29 +116,6 @@ public class ImageServiceImageProvider implements ImageProvider {
         postBufferState();
     }
 
-    private Image getImageFromResource(String path) {
-        baseUrl.setRawPath(path);
-        Image image = null;
-        try {
-            LOG.debug("Loading image from " + baseUrl);
-            HttpRequest request = requestFactory.buildGetRequest(baseUrl);
-            setAuth(request);
-            HttpResponse response = request.execute();
-            if (MediaType.parse(response.getContentType()).is(MediaType.ANY_IMAGE_TYPE)) {
-                image = new Image(response.getContent());
-            }
-        } catch (IOException e) {
-            LOG.debug("Can't receive image: " + e.getMessage());
-        }
-        return image;
-    }
-
-    private void setAuth(HttpRequest request) {
-        if (user != null) {
-            request.getHeaders().setBasicAuthentication(user, pass);
-        }
-    }
-
     private void fillBufferAsync() {
         if (bufferTask == null || bufferTask.isDone()) {
             bufferTask = CompletableFuture.runAsync(this::fillBuffer);
@@ -171,15 +123,12 @@ public class ImageServiceImageProvider implements ImageProvider {
     }
 
     private void fillBuffer() {
-        String path = INDEX_PATH;
-        if (filterPath != null) {
-            path = INDEX_FILTER_PATH + "" + filterPath;
-        }
         LOG.debug("Filling buffer...");
         while (buffer.size() < BUFFER_SIZE) {
-            Image image = getImageFromResource(path + "/" + random.nextInt(maxIndex + 1));
+            ImageServiceImageId id = new ImageServiceImageId(random.nextInt(maxIndex+1), filterPath);
+            Image image = imageService.getImage(id);
             if (image != null) {
-                buffer.offerFirst(image);
+                buffer.offerFirst(new ImageWithId(image, id));
                 LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
                 postBufferState();
             } else {
@@ -193,29 +142,7 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     @Override
     public int getMaxIndex() {
-        baseUrl.setRawPath(INDEX_PATH);
-        LOG.debug("Retieving max index from " + baseUrl);
-        return readIntFromUrl(baseUrl);
-    }
-
-    private int readIntFromUrl(GenericUrl url) {
-        int result = 0;
-        LOG.debug("Trying to retrieve int from: " + url);
-        try {
-            HttpRequest request = requestFactory.buildGetRequest(url);
-            setAuth(request);
-            HttpResponse response = request.execute();
-            String string = CharStreams.toString(new InputStreamReader(response.getContent()));
-            try {
-                result = Integer.parseInt(string);
-                LOG.debug("int retieved: " + result);
-            } catch (NumberFormatException e) {
-                LOG.debug("Problem parsing string \"" + string + "\" as int.");
-            }
-        } catch (IOException e) {
-            LOG.debug("Problem retrieving int: ", e);
-        }
-        return result;
+        return imageService.maxIndex();
     }
 
     @Override
@@ -225,16 +152,11 @@ public class ImageServiceImageProvider implements ImageProvider {
             maxIndex = getMaxIndex();
         } else {
             filterPath = path;
-            maxIndex = updateMaxIndexForFilter(path);
+            maxIndex = imageService.maxIndexForFilter(path);
         }
         LOG.debug("path set to " + path);
         buffer.clear();
         fillBufferAsync();
-    }
-
-    private int updateMaxIndexForFilter(String path) {
-        baseUrl.setRawPath(path + INFO);
-        return readIntFromUrl(baseUrl);
     }
 
     @Override
@@ -254,6 +176,11 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     public interface Inst {
         ImageServiceImageProvider get(@Assisted String serviceUrl);
+    }
+
+    @Override
+    public String getInfoForLast() {
+        return imageService.getImageInfo(currentImage);
     }
 
 }

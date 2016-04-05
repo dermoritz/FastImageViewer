@@ -1,4 +1,4 @@
-package de.moritz.fastimageviewer.image;
+package de.moritz.fastimageviewer.image.file;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

@@ -9,11 +9,11 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
 
-<AnchorPane fx:id="root" prefHeight="713.0" xmlns="http://javafx.com/javafx/8.0.72" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" prefHeight="713.0" prefWidth="1361.0" xmlns="http://javafx.com/javafx/8.0.72" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ToolBar fx:id="toolBar" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="1107.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
-            <TextField fx:id="pathField" />
+            <TextField fx:id="pathField" prefHeight="25.0" prefWidth="396.0" />
             <Label text="/" />
             <TextField fx:id="filterField" />
             <Button fx:id="goButton" mnemonicParsing="false" text="go" />
@@ -21,9 +21,9 @@
             <Label text="Buffer" />
             <ProgressBar fx:id="bufferBar" prefHeight="18.0" prefWidth="173.0" progress="0.0" />
             <Button fx:id="infoButton" mnemonicParsing="false" text="info" />
-            <TextField fx:id="infoField" alignment="TOP_LEFT" editable="false" prefHeight="25.0" prefWidth="448.0" />
+            <TextField fx:id="infoField" alignment="TOP_LEFT" editable="false" minWidth="50.0" prefHeight="25.0" prefWidth="483.0" />
         </items>
       </ToolBar>
-      <StackPane fx:id="imageArea" minHeight="-Infinity" minWidth="-Infinity" prefHeight="673.0" prefWidth="1107.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+      <StackPane fx:id="imageArea" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1417.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
    </children>
 </AnchorPane>

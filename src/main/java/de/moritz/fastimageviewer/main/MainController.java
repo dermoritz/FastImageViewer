@@ -29,6 +29,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
 /**
@@ -42,7 +43,7 @@ public class MainController implements Initializable {
     private final String[] args;
 
     @FXML
-    private SplitPane root;
+    private AnchorPane root;
 
     @FXML
     private StackPane imageArea;

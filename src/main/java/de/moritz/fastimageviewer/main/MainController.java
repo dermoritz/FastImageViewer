@@ -19,8 +19,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
@@ -65,6 +65,9 @@ public class MainController implements Initializable {
 
     @FXML
     private TextField infoField;
+
+    @FXML
+    private CheckBox sortCheckBox;
 
 
     private String startPath;
@@ -117,6 +120,7 @@ public class MainController implements Initializable {
         imageArea.setOnMouseReleased((event) -> imageView.fitImage());
         goButton.setOnAction(this::handlePathChanged);
         infoButton.setOnAction(this::onInfoButton);
+        sortCheckBox.selectedProperty().addListener(this::sortChanged);
     }
 
     @Override
@@ -199,5 +203,10 @@ public class MainController implements Initializable {
     private void handleResize(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         imageView.fitImage();
     }
+
+    private void sortChanged(ObservableValue<? extends Boolean> selected, Boolean oldV, Boolean newV){
+        ip.setSort(newV);
+    }
+
 
 }

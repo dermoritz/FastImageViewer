@@ -26,12 +26,6 @@ public interface ImageProvider extends Iterator<Image> {
 	Image getImage();
 
 	/**
-	 *
-	 * @return max index
-	 */
-	int getMaxIndex();
-
-	/**
 	 * Sets source path for images.
 	 *
 	 * @param path
@@ -45,4 +39,12 @@ public interface ImageProvider extends Iterator<Image> {
 	 * @return info for last image delivered.
 	 */
 	String getInfoForLast();
+
+	/**
+	 * If set to true images will by put out sorted (most likely name). False will return images in random order.
+	 * The default is specified by implementing class.
+	 *
+	 * @param true:sorted, false: random image out put
+	 */
+	void setSort(boolean sorted);
 }

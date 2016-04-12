@@ -34,6 +34,7 @@ public class FileImageProvider implements ImageProvider {
     private static final Logger LOG = LoggerFactory.getLogger(FileImageProvider.class);
     private ImageBuffer imageBuffer;
     private ImageBuffer.Inst imageBufferFactory;
+    private boolean sorted = true;
 
     @Inject
     private FileImageProvider(@Nullable @Assisted String path, ImageBuffer.Inst imageBufferFactory) {
@@ -85,8 +86,7 @@ public class FileImageProvider implements ImageProvider {
         return new Image(imageUrl);
     }
 
-    @Override
-    public int getMaxIndex() {
+    private int getMaxIndex() {
         return imagePaths.size() - 1;
     }
 
@@ -134,7 +134,7 @@ public class FileImageProvider implements ImageProvider {
                 }
             }
         }
-        if(imagePaths.size()>0){
+        if (imagePaths.size() > 0) {
             imageBuffer = imageBufferFactory.get(BACK_BUFFER_SIZE, FORWARD_BUFFER_SIZE, getMaxIndex(), this::loadImage);
         }
     }
@@ -144,13 +144,19 @@ public class FileImageProvider implements ImageProvider {
         return getImage(currentIndex);
     }
 
-    public interface Inst{
+    public interface Inst {
         FileImageProvider get(@Assisted String path);
     }
 
     @Override
     public String getInfoForLast() {
         return "to be implemented.";
+    }
+
+    @Override
+    public void setSort(boolean sorted) {
+        this.sorted = sorted;
+
     }
 
 }

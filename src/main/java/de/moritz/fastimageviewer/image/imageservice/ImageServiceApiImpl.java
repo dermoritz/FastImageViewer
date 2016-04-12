@@ -72,7 +72,8 @@ public class ImageServiceApiImpl implements ImageServiceApi {
     @Override
     public int maxIndexForFilter(String filter) {
         baseUrl.setRawPath("/"+ cleatFirstSlash(filter) + INFO);
-        return readIntFromUrl(baseUrl);
+        //because service returns number of files matching the filter we have to decrease by 1
+        return readIntFromUrl(baseUrl) - 1;
     }
 
     private Image getImageFromResource(String path) {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Separator?>
@@ -17,6 +18,7 @@
             <Label text="/" />
             <TextField fx:id="filterField" />
             <Button fx:id="goButton" mnemonicParsing="false" text="go" />
+            <CheckBox fx:id="sortCheckBox" mnemonicParsing="false" text="sort" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
             <Label text="Buffer" />
             <ProgressBar fx:id="bufferBar" prefHeight="18.0" prefWidth="173.0" progress="0.0" />

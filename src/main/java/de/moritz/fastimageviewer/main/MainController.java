@@ -14,6 +14,7 @@ import de.moritz.fastimageviewer.image.file.FileImageProvider;
 import de.moritz.fastimageviewer.image.file.FileImageProvider.Inst;
 import de.moritz.fastimageviewer.image.imageservice.ImageServiceImageProvider;
 import de.moritz.fastimageviewer.main.DiModule.Args;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -166,6 +167,8 @@ public class MainController implements Initializable {
         } else if (event.getCode() == KeyCode.PAGE_DOWN) {
             imageView.setImageAndFit(ip.next());
             event.consume();
+        } else if (event.getCode() == KeyCode.ESCAPE){
+            Platform.exit();
         }
     }
 

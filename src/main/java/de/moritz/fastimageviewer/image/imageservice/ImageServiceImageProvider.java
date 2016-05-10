@@ -1,24 +1,20 @@
 package de.moritz.fastimageviewer.image.imageservice;
 
+import com.google.common.eventbus.EventBus;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import de.moritz.fastimageviewer.image.ImageProvider;
+import de.moritz.fastimageviewer.main.BufferState;
+import javafx.scene.image.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Stopwatch;
-import com.google.common.eventbus.EventBus;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import de.moritz.fastimageviewer.image.ImageProvider;
-import de.moritz.fastimageviewer.main.BufferState;
-import javafx.scene.image.Image;
 
 /**
  * Created by moritz on 25.02.2016.
@@ -27,6 +23,8 @@ import javafx.scene.image.Image;
  *
  */
 public class ImageServiceImageProvider implements ImageProvider {
+
+    private boolean waitingOnFirst;
 
     public interface Inst {
         ImageServiceImageProvider get(@Assisted String serviceUrl);
@@ -70,22 +68,13 @@ public class ImageServiceImageProvider implements ImageProvider {
 
     @Override
     public Image getImage() {
-        Stopwatch createStarted = Stopwatch.createStarted();
         noImageFound = false;
         fillBufferAsync(false);
-        while (buffer.size() < 1 && !noImageFound) {
-            if (createStarted.elapsed(TimeUnit.SECONDS) <= LOAD_TIME_OUT_SECONDS) {
-                LOG.debug("Buffer is empty.. waiting");
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new IllegalStateException("Problem on sleeping!?: ", e);
-                }
-            } else {
-                LOG.debug("Timeout reached for try again...");
-                return null;
-            }
+        if(buffer.size() < 1 && !noImageFound){
+            waitingOnFirst = true;
+            return null;
         }
+
         ImageWithId poll = buffer.poll();
         addToHistory(poll);
         currentImage = poll.getId();
@@ -168,7 +157,12 @@ public class ImageServiceImageProvider implements ImageProvider {
             ImageServiceImageId id = new ImageServiceImageId(getNextIndex(), filterPath);
             Image image = imageService.getImage(id);
             if (image != null) {
-                buffer.offer(new ImageWithId(image, id));
+                ImageWithId imageWithId = new ImageWithId(image, id);
+                buffer.offer(imageWithId);
+                if(waitingOnFirst){
+                    eventBus.post(imageWithId.getImage());
+                    waitingOnFirst = false;
+                }
                 LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
                 postBufferState();
             } else {

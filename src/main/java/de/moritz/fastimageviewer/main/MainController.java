@@ -1,14 +1,7 @@
 package de.moritz.fastimageviewer.main;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
-
 import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.image.file.FileImageProvider;
 import de.moritz.fastimageviewer.image.file.FileImageProvider.Inst;
@@ -24,14 +17,14 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Created by moritz on 05.03.2016.
@@ -90,6 +83,11 @@ public class MainController implements Initializable {
     @Subscribe
     public void updateBuffer(BufferState state) {
         bufferBar.setProgress(state.getForward());
+    }
+
+    @Subscribe
+    public void setImageWaitedFor(Image image) {
+        imageView.setImageAndFit(image);
     }
 
     private ImageProvider getIp(String[] args) {

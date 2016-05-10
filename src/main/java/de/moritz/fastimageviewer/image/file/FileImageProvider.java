@@ -1,7 +1,13 @@
 package de.moritz.fastimageviewer.image.file;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import de.moritz.fastimageviewer.image.ImageProvider;
+import javafx.scene.image.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -12,16 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import de.moritz.fastimageviewer.image.ImageProvider;
-import javafx.scene.image.Image;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class FileImageProvider implements ImageProvider {
 
@@ -34,7 +31,6 @@ public class FileImageProvider implements ImageProvider {
     private static final Logger LOG = LoggerFactory.getLogger(FileImageProvider.class);
     private ImageBuffer imageBuffer;
     private ImageBuffer.Inst imageBufferFactory;
-    private boolean sorted = true;
 
     @Inject
     private FileImageProvider(@Nullable @Assisted String path, ImageBuffer.Inst imageBufferFactory) {
@@ -92,10 +88,7 @@ public class FileImageProvider implements ImageProvider {
 
     @Override
     public boolean hasNext() {
-        if (getMaxIndex() > 0 && currentIndex < getMaxIndex()) {
-            return true;
-        }
-        return false;
+        return getMaxIndex() > 0 && currentIndex < getMaxIndex();
     }
 
     @Override
@@ -127,12 +120,10 @@ public class FileImageProvider implements ImageProvider {
             this.imageFolder = Paths.get(file.getParent());
             getFiles();
             // searching given file an set index accordingly.
-            for (Path filePath : imagePaths) {
-                if (filePath.equals(Paths.get(path))) {
-                    currentIndex = imagePaths.indexOf(filePath);
-                    LOG.debug("Setting index to " + currentIndex + " for image " + file.getName());
-                }
-            }
+            imagePaths.stream().filter(filePath -> filePath.equals(Paths.get(path))).forEach(filePath -> {
+                currentIndex = imagePaths.indexOf(filePath);
+                LOG.debug("Setting index to " + currentIndex + " for image " + file.getName());
+            });
         }
         if (imagePaths.size() > 0) {
             imageBuffer = imageBufferFactory.get(BACK_BUFFER_SIZE, FORWARD_BUFFER_SIZE, getMaxIndex(), this::loadImage);
@@ -155,8 +146,7 @@ public class FileImageProvider implements ImageProvider {
 
     @Override
     public void setSort(boolean sorted) {
-        this.sorted = sorted;
-
+        //noop
     }
 
 }

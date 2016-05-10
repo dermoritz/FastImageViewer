@@ -93,7 +93,7 @@ public class MainController implements Initializable {
     private ImageProvider getIp(String[] args) {
         startPath = args == null || args.length < 1 ? null : args[0];
         subPath = null;
-        ImageProvider ip = null;
+        ImageProvider ip;
         if (startPath != null && startPath.toLowerCase().startsWith("http")) {
             webserviceMode = true;
             ip = serviceImageProviderFactory.get(startPath);
@@ -186,6 +186,7 @@ public class MainController implements Initializable {
             ip.setPath(db.getFiles().get(0).toString());
             Image image = ip.getImage();
             imageView.setImageAndFit(image);
+            success = true;
         }
         event.setDropCompleted(success);
         event.consume();

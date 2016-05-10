@@ -1,25 +1,12 @@
 package de.moritz.fastimageviewer.main;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import com.google.common.eventbus.EventBus;
-import com.google.inject.AbstractModule;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-
 import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.image.file.FileImageProvider;
 import de.moritz.fastimageviewer.image.file.ImageBuffer;
@@ -27,6 +14,12 @@ import de.moritz.fastimageviewer.image.imageservice.ImageServiceApi;
 import de.moritz.fastimageviewer.image.imageservice.ImageServiceApiFactory;
 import de.moritz.fastimageviewer.image.imageservice.ImageServiceApiImpl;
 import de.moritz.fastimageviewer.image.imageservice.ImageServiceImageProvider;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 public class DiModule extends AbstractModule {
 
@@ -53,13 +46,9 @@ public class DiModule extends AbstractModule {
 
             @Override
             public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-                encounter.register(new InjectionListener<I>() {
+                encounter.register((InjectionListener<I>) injectee -> {
+                    eventBus.register(injectee);
 
-                    @Override
-                    public void afterInjection(Object injectee) {
-                        eventBus.register(injectee);
-
-                    }
                 });
 
             }

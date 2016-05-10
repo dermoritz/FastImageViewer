@@ -31,7 +31,7 @@ public interface ImageServiceApi {
 
     /**
      * Indexes to be used for given filter range from 0 to this.
-     * @param filter
+     * @param filter filter String
      * @return max index for this filter (means there are maxIndex+1 images matching the filter)
      */
     int maxIndexForFilter(String filter);

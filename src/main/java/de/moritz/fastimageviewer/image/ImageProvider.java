@@ -1,8 +1,8 @@
 package de.moritz.fastimageviewer.image;
 
-import java.util.Iterator;
-
 import javafx.scene.image.Image;
+
+import java.util.Iterator;
 
 public interface ImageProvider extends Iterator<Image> {
 	/**
@@ -44,7 +44,7 @@ public interface ImageProvider extends Iterator<Image> {
 	 * If set to true images will by put out sorted (most likely name). False will return images in random order.
 	 * The default is specified by implementing class.
 	 *
-	 * @param true:sorted, false: random image out put
+	 * @param sorted true:sorted, false: random image out put
 	 */
 	void setSort(boolean sorted);
 }

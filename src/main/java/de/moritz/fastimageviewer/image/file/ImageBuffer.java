@@ -1,7 +1,12 @@
 package de.moritz.fastimageviewer.image.file;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.eventbus.EventBus;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import de.moritz.fastimageviewer.main.BufferState;
+import javafx.scene.image.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,15 +15,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.eventbus.EventBus;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
-import de.moritz.fastimageviewer.main.BufferState;
-import javafx.scene.image.Image;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ImageBuffer {
 
@@ -65,13 +63,10 @@ public class ImageBuffer {
         int left = index - backward >= 0 ? index - backward : 0;
         // remove images out of range
         Set<Integer> keys = new HashSet<>(imageBuffer.keySet());
-        for (Integer i : keys) {
-            if (i < left || i > right) {
-                LOG.debug("Removing image " + i + " from buffer.");
-                imageBuffer.remove(i);
-                //updateBufferState(index);
-            }
-        }
+        keys.stream().filter(i -> i < left || i > right).forEach(i -> {
+            LOG.debug("Removing image " + i + " from buffer.");
+            imageBuffer.remove(i);
+        });
         // add all that are not in buff but in range
         for (int i = left; i <= right; i++) {
             if (imageBuffer.get(i) == null) {

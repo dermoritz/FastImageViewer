@@ -158,13 +158,17 @@ public class ImageServiceImageProvider implements ImageProvider {
             Image image = imageService.getImage(id);
             if (image != null) {
                 ImageWithId imageWithId = new ImageWithId(image, id);
-                buffer.offer(imageWithId);
                 if(waitingOnFirst){
                     eventBus.post(imageWithId.getImage());
+                    addToHistory(imageWithId);
+                    currentImage = imageWithId.getId();
                     waitingOnFirst = false;
+                    LOG.debug("Image sent directly to view");
+                } else {
+                    buffer.offer(imageWithId);
+                    LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
+                    postBufferState();
                 }
-                LOG.debug("Added image to buffer, " + buffer.size() + " images buffered.");
-                postBufferState();
             } else {
                 noImageFound = true;
                 LOG.debug("no image found, change url...");

@@ -144,7 +144,7 @@ public class ImageServiceImageProvider implements ImageProvider {
     private void addToHistory(ImageWithId image) {
         historyBuffer.add(image);
         if (historyBuffer.size() > HISTORY_BUFFER_SIZE) {
-            LOG.debug("revoving first image from history buffer.");
+            LOG.debug("removing first image from history buffer.");
             historyBuffer.remove(0);
         }
         historyIndex = historyBuffer.size() - 1;

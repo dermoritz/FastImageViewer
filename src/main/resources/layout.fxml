@@ -17,8 +17,8 @@
             <TextField fx:id="pathField" prefHeight="25.0" prefWidth="396.0" />
             <Label text="/" />
             <TextField fx:id="filterField" />
-            <Button fx:id="goButton" mnemonicParsing="false" text="go" />
             <CheckBox fx:id="sortCheckBox" mnemonicParsing="false" text="sort" />
+            <Button fx:id="goButton" mnemonicParsing="false" text="go" />
             <Separator orientation="VERTICAL" prefHeight="200.0" />
             <Label text="Buffer" />
             <ProgressBar fx:id="bufferBar" prefHeight="18.0" prefWidth="173.0" progress="0.0" />

@@ -33,7 +33,6 @@ public class ImageServiceImageProvider implements ImageProvider {
     private static final Logger LOG = LoggerFactory.getLogger(ImageServiceImageProvider.class);
     private static final int BUFFER_SIZE = 10;
     private static final int HISTORY_BUFFER_SIZE = 5;
-    private static final int LOAD_TIME_OUT_SECONDS = 10;
 
     private Random random = new SecureRandom();
     private volatile ConcurrentLinkedDeque<ImageWithId> buffer = new ConcurrentLinkedDeque<>();

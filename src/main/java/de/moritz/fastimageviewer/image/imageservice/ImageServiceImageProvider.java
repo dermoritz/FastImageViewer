@@ -135,7 +135,6 @@ public class ImageServiceImageProvider implements ImageProvider {
         if (this.sorted != sorted) {
             this.sorted = sorted;
             lastIndexLoaded = 0;
-            fillBufferAsync(true);
         }
 
     }

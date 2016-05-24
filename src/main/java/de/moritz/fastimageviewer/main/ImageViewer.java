@@ -2,6 +2,7 @@ package de.moritz.fastimageviewer.main;
 
 import com.google.inject.Inject;
 
+import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -50,10 +51,16 @@ public class ImageViewer extends ImageView {
     }
 
     public void handleMouseDown( MouseEvent event ) {
+        getScene().setCursor(Cursor.NONE);
         double x = event.getX();
         double y = event.getY();
         event.consume();
         zoom100( x, y );
+    }
+
+    public void  handleMouseRelease(MouseEvent event) {
+        getScene().setCursor(Cursor.DEFAULT);
+        fitImage();
     }
 
     private void zoom100( double x, double y ) {

@@ -117,6 +117,7 @@ public class MainController implements Initializable {
         root.setOnDragDropped(this::dropFile);
         imageArea.setOnMousePressed(imageView::handleMouseDown);
         imageArea.setOnMouseReleased(imageView::handleMouseRelease);
+        imageArea.setOnMouseDragged(imageView::dragOnMouseMove);
         goButton.setOnAction(this::handlePathChanged);
         infoButton.setOnAction(this::onInfoButton);
         sortCheckBox.selectedProperty().addListener(this::sortChanged);

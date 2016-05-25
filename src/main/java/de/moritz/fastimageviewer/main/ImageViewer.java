@@ -1,14 +1,21 @@
 package de.moritz.fastimageviewer.main;
 
 import com.google.inject.Inject;
-
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImageViewer extends ImageView {
+
+    private volatile Boolean zoomedIn = false;
+
+    private static final Logger LOG = LoggerFactory.getLogger( ImageViewer.class );
+    private Double mouseStartX;
+    private Double mouseStartY;
 
     @Inject
     private ImageViewer() {
@@ -51,16 +58,35 @@ public class ImageViewer extends ImageView {
     }
 
     public void handleMouseDown( MouseEvent event ) {
+        LOG.debug( "handle mouse down" );
         getScene().setCursor(Cursor.NONE);
         double x = event.getX();
         double y = event.getY();
         event.consume();
+        zoomedIn = true;
         zoom100( x, y );
+        mouseStartX = null;
+        mouseStartY = null;
     }
 
-    public void  handleMouseRelease(MouseEvent event) {
+    public void handleMouseRelease( MouseEvent event ) {
         getScene().setCursor(Cursor.DEFAULT);
+        zoomedIn = false;
         fitImage();
+    }
+
+    public void dragOnMouseMove( MouseEvent event ) {
+        if( zoomedIn ) {
+            if( mouseStartX != null && mouseStartY != null ) {
+                double x = this.getTranslateX() - (mouseStartX - event.getX());
+                double y = this.getTranslateY() - (mouseStartY - event.getY());
+                LOG.trace( "moving picture to: " + x + "," + y );
+                this.setTranslateX( x );
+                this.setTranslateY( y );
+            }
+            mouseStartX = event.getX();
+            mouseStartY = event.getY();
+        }
     }
 
     private void zoom100( double x, double y ) {

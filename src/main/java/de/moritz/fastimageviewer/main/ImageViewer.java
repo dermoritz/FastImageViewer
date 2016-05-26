@@ -80,7 +80,6 @@ public class ImageViewer extends ImageView {
             if( mouseStartX != null && mouseStartY != null ) {
                 double x = this.getTranslateX() - (mouseStartX - event.getX());
                 double y = this.getTranslateY() - (mouseStartY - event.getY());
-                LOG.trace( "moving picture to: " + x + "," + y );
                 this.setTranslateX( x );
                 this.setTranslateY( y );
             }

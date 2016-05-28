@@ -53,8 +53,12 @@ public class ImageViewer extends ImageView {
         double width = getParentWidth();
         double height = getParentHeight();
         this.setPreserveRatio( true );
-        this.setFitHeight( height );
-        this.setFitWidth( width );
+        double imageHeight = this.getImage().getHeight();
+        double imageWidth = this.getImage().getWidth();
+        if(imageHeight>height && imageWidth > width) {
+            this.setFitHeight(height);
+            this.setFitWidth(width);
+        }
     }
 
     public void handleMouseDown( MouseEvent event ) {

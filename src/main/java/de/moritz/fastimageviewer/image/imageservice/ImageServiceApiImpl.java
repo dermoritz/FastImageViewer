@@ -94,23 +94,20 @@ public class ImageServiceApiImpl implements ImageServiceApi {
     }
 
     private String getPathFromId(ImageServiceImageId id) {
-        String path;
-        if (Strings.isNullOrEmpty(id.getFilter())) {
-            path = INDEX_PATH + "/" + id.getIndex();
-        } else {
-            String filter = cleatFirstSlash(id.getFilter());
-            path = INDEX_FILTER_PATH + "/" + filter + "/" + id.getIndex();
-        }
-        return path;
+        return  getPathToInfo( id, INDEX_FILTER_PATH, INDEX_PATH );
     }
 
     private String getInfoPathFromId(ImageServiceImageId id) {
+        return getPathToInfo( id, INDEX_FILTER_INFO, INDEX_INFO_PATH );
+    }
+
+    private String getPathToInfo(ImageServiceImageId id, String withFilter, String withoutFilter){
         String path;
         if (Strings.isNullOrEmpty(id.getFilter())) {
-            path = INDEX_INFO_PATH + "/" + id.getIndex();
+            path = withoutFilter + "/" + id.getIndex();
         } else {
             String filter = cleatFirstSlash(id.getFilter());
-            path = INDEX_FILTER_INFO + "/" + filter + "/" + id.getIndex();
+            path = withFilter + "/" + filter + "/" + id.getIndex();
         }
         return path;
     }

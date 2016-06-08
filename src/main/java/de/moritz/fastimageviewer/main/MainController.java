@@ -1,8 +1,5 @@
 package de.moritz.fastimageviewer.main;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -18,7 +15,6 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
@@ -37,7 +33,7 @@ import javafx.scene.layout.StackPane;
  * Created by moritz on 05.03.2016.
  */
 @Singleton
-public class MainController implements Initializable {
+public class MainController {
 
     private final ImageViewer imageView;
     private ImageProvider ip;
@@ -130,8 +126,8 @@ public class MainController implements Initializable {
         sortCheckBox.selectedProperty().addListener( this::sortChanged );
     }
 
-    @Override
-    public void initialize( URL location, ResourceBundle resources ) {
+    @FXML
+    public void initialize() {
         imageArea.getChildren().add( imageView.getImageView() );
         registerEvents();
         if( args.length > 0 ) {

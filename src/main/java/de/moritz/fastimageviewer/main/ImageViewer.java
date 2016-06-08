@@ -103,7 +103,7 @@ public class ImageViewer extends ImageView {
      */
     public void moveImageX( double x ) {
         if( zoomedIn ) {
-            this.setTranslateX( x );
+            this.setTranslateX( this.getTranslateX() + x );
         }
     }
 
@@ -113,7 +113,7 @@ public class ImageViewer extends ImageView {
      */
     public void moveImageY( double y ) {
         if (zoomedIn) {
-            this.setTranslateY( y );
+            this.setTranslateY( this.getTranslateY() + y );
         }
     }
 

@@ -1,7 +1,14 @@
 package de.moritz.fastimageviewer.main;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
+
 import de.moritz.fastimageviewer.image.ImageProvider;
 import de.moritz.fastimageviewer.image.file.FileImageProvider;
 import de.moritz.fastimageviewer.image.file.FileImageProvider.Inst;
@@ -17,14 +24,14 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.*;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 /**
  * Created by moritz on 05.03.2016.
@@ -35,6 +42,7 @@ public class MainController implements Initializable {
     private final ImageViewer imageView;
     private ImageProvider ip;
     private final String[] args;
+    private static final float MOVEMENT_PIXEL = 10f;
 
     @FXML
     private AnchorPane root;
@@ -63,7 +71,6 @@ public class MainController implements Initializable {
     @FXML
     private CheckBox sortCheckBox;
 
-
     private String startPath;
     private String subPath;
     private boolean webserviceMode;
@@ -71,145 +78,160 @@ public class MainController implements Initializable {
     private de.moritz.fastimageviewer.image.imageservice.ImageServiceImageProvider.Inst serviceImageProviderFactory;
 
     @Inject
-    public MainController(ImageViewer imageView, @Args String[] args, FileImageProvider.Inst fileImageProviderFactory,
-                          ImageServiceImageProvider.Inst serviceImageProviderFactory) {
+    public MainController( ImageViewer imageView, @Args String[] args, FileImageProvider.Inst fileImageProviderFactory,
+            ImageServiceImageProvider.Inst serviceImageProviderFactory ) {
         this.args = args;
         this.fileImageProviderFactory = fileImageProviderFactory;
         this.serviceImageProviderFactory = serviceImageProviderFactory;
-        this.ip = getIp(args);
+        this.ip = getIp( args );
         this.imageView = imageView;
     }
 
     @Subscribe
-    public void updateBuffer(BufferState state) {
-        bufferBar.setProgress(state.getForward());
+    public void updateBuffer( BufferState state ) {
+        bufferBar.setProgress( state.getForward() );
     }
 
     @Subscribe
-    public void setImageWaitedFor(Image image) {
-        imageView.setImageAndFit(image);
+    public void setImageWaitedFor( Image image ) {
+        imageView.setImageAndFit( image );
     }
 
-    private ImageProvider getIp(String[] args) {
+    private ImageProvider getIp( String[] args ) {
         startPath = args == null || args.length < 1 ? null : args[0];
         subPath = null;
         ImageProvider ip;
-        if (startPath != null && startPath.toLowerCase().startsWith("http")) {
+        if( startPath != null && startPath.toLowerCase().startsWith( "http" ) ) {
             webserviceMode = true;
-            ip = serviceImageProviderFactory.get(startPath);
-            if (args.length > 1 && !Strings.isNullOrEmpty(args[1])) {
+            ip = serviceImageProviderFactory.get( startPath );
+            if( args.length > 1 && !Strings.isNullOrEmpty( args[1] ) ) {
                 subPath = args[1];
-                ip.setPath(subPath);
+                ip.setPath( subPath );
             }
         } else {
             webserviceMode = false;
-            ip = fileImageProviderFactory.get(startPath);
+            ip = fileImageProviderFactory.get( startPath );
         }
         return ip;
     }
 
     private void registerEvents() {
-        root.addEventFilter(KeyEvent.KEY_PRESSED, this::pageKey);
-        root.setOnScroll(this::handleScroll);
-        root.heightProperty().addListener(this::handleResize);
-        root.widthProperty().addListener(this::handleResize);
-        root.setOnDragOver(this::dragOver);
-        root.setOnDragDropped(this::dropFile);
-        imageArea.setOnMousePressed(imageView::handleMouseDown);
-        imageArea.setOnMouseReleased(imageView::handleMouseRelease);
-        imageArea.setOnMouseDragged(imageView::dragOnMouseMove);
-        goButton.setOnAction(this::handlePathChanged);
-        infoButton.setOnAction(this::onInfoButton);
-        sortCheckBox.selectedProperty().addListener(this::sortChanged);
+        root.addEventFilter( KeyEvent.KEY_PRESSED, this::keys );
+        root.setOnScroll( this::handleScroll );
+        root.heightProperty().addListener( this::handleResize );
+        root.widthProperty().addListener( this::handleResize );
+        root.setOnDragOver( this::dragOver );
+        root.setOnDragDropped( this::dropFile );
+        imageArea.setOnMousePressed( imageView::handleMouseDown );
+        imageArea.setOnMouseReleased( imageView::handleMouseRelease );
+        imageArea.setOnMouseDragged( imageView::dragOnMouseMove );
+        goButton.setOnAction( this::handlePathChanged );
+        infoButton.setOnAction( this::onInfoButton );
+        sortCheckBox.selectedProperty().addListener( this::sortChanged );
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        imageArea.getChildren().add(imageView.getImageView());
+    public void initialize( URL location, ResourceBundle resources ) {
+        imageArea.getChildren().add( imageView.getImageView() );
         registerEvents();
-        if (args.length > 0) {
-            pathField.setText(args[0]);
+        if( args.length > 0 ) {
+            pathField.setText( args[0] );
         }
-        if (args.length > 1) {
-            filterField.setText(args[1].replaceFirst("/", ""));
+        if( args.length > 1 ) {
+            filterField.setText( args[1].replaceFirst( "/", "" ) );
         }
     }
 
     public void onReady() {
-        if (ip != null && ip.hasNext()) {
-            imageView.setImageAndFit(ip.next());
+        if( ip != null && ip.hasNext() ) {
+            imageView.setImageAndFit( ip.next() );
         }
     }
 
-    private void onInfoButton(ActionEvent event){
-        infoField.setText(ip.getInfoForLast());
+    private void onInfoButton( ActionEvent event ) {
+        infoField.setText( ip.getInfoForLast() );
     }
 
-    private void handlePathChanged(ActionEvent event) {
+    private void handlePathChanged( ActionEvent event ) {
         String newFilter = filterField.getText();
-        if (!Strings.isNullOrEmpty(newFilter) && !newFilter.startsWith("/")) {
+        if( !Strings.isNullOrEmpty( newFilter ) && !newFilter.startsWith( "/" ) ) {
             newFilter = "/" + newFilter;
         }
-        if (!pathField.getText().equals(startPath)) {
-            ip = getIp(new String[] {pathField.getText(), newFilter});
-            imageView.setImageAndFit(ip.next());
-        } else if (!newFilter.equals(subPath) && webserviceMode) {
-            ip.setPath(newFilter);
-            imageView.setImageAndFit(ip.next());
+        if( !pathField.getText().equals( startPath ) ) {
+            ip = getIp( new String[] { pathField.getText(), newFilter } );
+            imageView.setImageAndFit( ip.next() );
+        } else if( !newFilter.equals( subPath ) && webserviceMode ) {
+            ip.setPath( newFilter );
+            imageView.setImageAndFit( ip.next() );
         }
     }
 
-    private void pageKey(KeyEvent event) {
-        if (event.getCode() == KeyCode.PAGE_UP) {
-            imageView.setImageAndFit(ip.prev());
-            event.consume();
-        } else if (event.getCode() == KeyCode.PAGE_DOWN) {
-            imageView.setImageAndFit(ip.next());
-            event.consume();
-        } else if (event.getCode() == KeyCode.ESCAPE){
-            Platform.exit();
+    private void keys( KeyEvent event ) {
+        KeyCode code = event.getCode();
+        switch( code ) {
+            case W:
+                imageView.moveImageY( MOVEMENT_PIXEL );
+                break;
+            case S:
+                imageView.moveImageY( -MOVEMENT_PIXEL );
+                break;
+            case A:
+                imageView.moveImageX( -MOVEMENT_PIXEL );
+                break;
+            case D:
+                imageView.moveImageX( MOVEMENT_PIXEL );
+                break;
+            case PAGE_UP:
+                imageView.setImageAndFit( ip.prev() );
+                break;
+            case PAGE_DOWN:
+                imageView.setImageAndFit( ip.next() );
+                break;
+            case ESCAPE:
+                Platform.exit();
+                break;
         }
+        event.consume();
     }
 
-    private void dragOver(DragEvent event) {
+    private void dragOver( DragEvent event ) {
         Dragboard db = event.getDragboard();
-        if (db.hasFiles()) {
-            event.acceptTransferModes(TransferMode.LINK);
+        if( db.hasFiles() ) {
+            event.acceptTransferModes( TransferMode.LINK );
         } else {
             event.consume();
         }
     }
 
-    private void dropFile(DragEvent event) {
+    private void dropFile( DragEvent event ) {
         Dragboard db = event.getDragboard();
         boolean success = false;
-        if (db.hasFiles() && db.getFiles().size() > 0) {
-            ip.setPath(db.getFiles().get(0).toString());
+        if( db.hasFiles() && db.getFiles().size() > 0 ) {
+            ip.setPath( db.getFiles().get( 0 ).toString() );
             Image image = ip.getImage();
-            imageView.setImageAndFit(image);
+            imageView.setImageAndFit( image );
             success = true;
         }
-        event.setDropCompleted(success);
+        event.setDropCompleted( success );
         event.consume();
     }
 
-    private void handleScroll(ScrollEvent event) {
+    private void handleScroll( ScrollEvent event ) {
         double deltaY = event.getDeltaY();
         event.consume();
-        if (deltaY < 0) {
-            imageView.setImageAndFit(ip.next());
+        if( deltaY < 0 ) {
+            imageView.setImageAndFit( ip.next() );
         } else {
-            imageView.setImageAndFit(ip.prev());
+            imageView.setImageAndFit( ip.prev() );
         }
     }
 
-    private void handleResize(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+    private void handleResize( ObservableValue<? extends Number> observable, Number oldValue, Number newValue ) {
         imageView.fitImage();
     }
 
-    private void sortChanged(ObservableValue<? extends Boolean> selected, Boolean oldV, Boolean newV){
-        ip.setSort(newV);
+    private void sortChanged( ObservableValue<? extends Boolean> selected, Boolean oldV, Boolean newV ) {
+        ip.setSort( newV );
     }
-
 
 }

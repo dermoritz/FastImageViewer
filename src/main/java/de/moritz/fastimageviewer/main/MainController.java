@@ -179,15 +179,16 @@ public class MainController {
                 break;
             case PAGE_UP:
                 imageView.setImageAndFit( ip.prev() );
+                event.consume();
                 break;
             case PAGE_DOWN:
                 imageView.setImageAndFit( ip.next() );
+                event.consume();
                 break;
             case ESCAPE:
                 Platform.exit();
                 break;
         }
-        event.consume();
     }
 
     private void dragOver( DragEvent event ) {

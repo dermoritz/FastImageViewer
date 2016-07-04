@@ -38,7 +38,7 @@ public class MainController {
     private final ImageViewer imageView;
     private ImageProvider ip;
     private final String[] args;
-    private static final float MOVEMENT_PIXEL = 10f;
+    private static final float MOVEMENT_PIXEL = 50f;
 
     @FXML
     private AnchorPane root;

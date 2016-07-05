@@ -3,6 +3,9 @@ package de.moritz.fastimageviewer.main;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 
@@ -15,6 +18,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
@@ -24,6 +28,7 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
@@ -39,6 +44,7 @@ public class MainController {
     private ImageProvider ip;
     private final String[] args;
     private static final float MOVEMENT_PIXEL = 50f;
+    private static final Logger LOG = LoggerFactory.getLogger( MainController.class );
 
     @FXML
     private AnchorPane root;
@@ -72,10 +78,13 @@ public class MainController {
     private boolean webserviceMode;
     private Inst fileImageProviderFactory;
     private de.moritz.fastimageviewer.image.imageservice.ImageServiceImageProvider.Inst serviceImageProviderFactory;
+    private boolean zoomedIn = false;
+    private Double mouseStartX;
+    private Double mouseStartY;
 
     @Inject
     public MainController( ImageViewer imageView, @Args String[] args, FileImageProvider.Inst fileImageProviderFactory,
-            ImageServiceImageProvider.Inst serviceImageProviderFactory ) {
+                           ImageServiceImageProvider.Inst serviceImageProviderFactory ) {
         this.args = args;
         this.fileImageProviderFactory = fileImageProviderFactory;
         this.serviceImageProviderFactory = serviceImageProviderFactory;
@@ -118,9 +127,9 @@ public class MainController {
         root.widthProperty().addListener( this::handleResize );
         root.setOnDragOver( this::dragOver );
         root.setOnDragDropped( this::dropFile );
-        imageArea.setOnMousePressed( imageView::handleMouseDown );
-        imageArea.setOnMouseReleased( imageView::handleMouseRelease );
-        imageArea.setOnMouseDragged( imageView::dragOnMouseMove );
+        imageArea.setOnMousePressed( this::handleMouseDown );
+        imageArea.setOnMouseReleased( this::handleMouseRelease );
+        imageArea.setOnMouseDragged( this::dragOnMouseMove );
         goButton.setOnAction( this::handlePathChanged );
         infoButton.setOnAction( this::onInfoButton );
         sortCheckBox.selectedProperty().addListener( this::sortChanged );
@@ -135,6 +144,40 @@ public class MainController {
         }
         if( args.length > 1 ) {
             filterField.setText( args[1].replaceFirst( "/", "" ) );
+        }
+    }
+
+    private void handleMouseDown( MouseEvent event ) {
+        if( event.getSource().equals( imageArea ) ) {
+            imageView.requestFocus();
+            LOG.debug( "handle mouse down" );
+            root.getScene().setCursor( Cursor.NONE );
+            double x = event.getX();
+            double y = event.getY();
+            event.consume();
+            zoomedIn = true;
+            imageView.zoom100( x, y );
+            mouseStartX = null;
+            mouseStartY = null;
+        }
+    }
+
+    public void handleMouseRelease( MouseEvent event ) {
+        root.getScene().setCursor( Cursor.DEFAULT );
+        zoomedIn = false;
+        imageView.fitImage();
+    }
+
+    public void dragOnMouseMove( MouseEvent event ) {
+        if( zoomedIn ) {
+            if( mouseStartX != null && mouseStartY != null ) {
+                double x = mouseStartX - event.getX();
+                double y = mouseStartY - event.getY();
+                imageView.moveImageX( x );
+                imageView.moveImageY( y );
+            }
+            mouseStartX = event.getX();
+            mouseStartY = event.getY();
         }
     }
 
@@ -154,7 +197,7 @@ public class MainController {
             newFilter = "/" + newFilter;
         }
         if( !pathField.getText().equals( startPath ) ) {
-            ip = getIp( new String[] { pathField.getText(), newFilter } );
+            ip = getIp( new String[]{ pathField.getText(), newFilter } );
             imageView.setImageAndFit( ip.next() );
         } else if( !newFilter.equals( subPath ) && webserviceMode ) {
             ip.setPath( newFilter );

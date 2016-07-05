@@ -5,19 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
-import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 public class ImageViewer extends ImageView {
 
-    private volatile Boolean zoomedIn = false;
-
     private static final Logger LOG = LoggerFactory.getLogger( ImageViewer.class );
-    private Double mouseStartX;
-    private Double mouseStartY;
 
     @Inject
     private ImageViewer() {
@@ -66,45 +60,12 @@ public class ImageViewer extends ImageView {
 
     }
 
-    public void handleMouseDown( MouseEvent event ) {
-        LOG.debug( "handle mouse down" );
-        getScene().setCursor( Cursor.NONE );
-        double x = event.getX();
-        double y = event.getY();
-        event.consume();
-        zoomedIn = true;
-        zoom100( x, y );
-        mouseStartX = null;
-        mouseStartY = null;
-    }
-
-    public void handleMouseRelease( MouseEvent event ) {
-        getScene().setCursor( Cursor.DEFAULT );
-        zoomedIn = false;
-        fitImage();
-    }
-
-    public void dragOnMouseMove( MouseEvent event ) {
-        if( zoomedIn ) {
-            if( mouseStartX != null && mouseStartY != null ) {
-                double x = this.getTranslateX() - ( mouseStartX - event.getX() );
-                double y = this.getTranslateY() - ( mouseStartY - event.getY() );
-                this.setTranslateX( x );
-                this.setTranslateY( y );
-            }
-            mouseStartX = event.getX();
-            mouseStartY = event.getY();
-        }
-    }
-
     /**
      * moves image horizontally by given amount
      * @param x x movement in pixels
      */
     public void moveImageX( double x ) {
-        if( zoomedIn ) {
-            this.setTranslateX( this.getTranslateX() + x );
-        }
+            this.setTranslateX( this.getTranslateX() - x );
     }
 
     /**
@@ -112,12 +73,10 @@ public class ImageViewer extends ImageView {
      * @param y y movement in pixels
      */
     public void moveImageY( double y ) {
-        if (zoomedIn) {
-            this.setTranslateY( this.getTranslateY() + y );
-        }
+            this.setTranslateY( this.getTranslateY() - y );
     }
 
-    private void zoom100( double x, double y ) {
+    public void zoom100( double x, double y ) {
         double oldHeight = this.getBoundsInLocal().getHeight();
         double oldWidth = this.getBoundsInLocal().getWidth();
 

@@ -146,7 +146,7 @@ public class FileImageProvider implements ImageProvider {
 
     @Override
     public String getInfoForLast() {
-        return "to be implemented.";
+        return imagePaths.get( currentIndex ).toString() + " (" + (currentIndex + 1) +"/" + imagePaths.size() + ")";
     }
 
     @Override

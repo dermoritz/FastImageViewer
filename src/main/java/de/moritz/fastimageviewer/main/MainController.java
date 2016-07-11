@@ -209,16 +209,24 @@ public class MainController {
         KeyCode code = event.getCode();
         switch( code ) {
             case W:
-                imageView.moveImageY( MOVEMENT_PIXEL );
+                if(zoomedIn){
+                    imageView.moveImageY( MOVEMENT_PIXEL );
+                }
                 break;
             case S:
-                imageView.moveImageY( -MOVEMENT_PIXEL );
+                if(zoomedIn){
+                    imageView.moveImageY( -MOVEMENT_PIXEL );
+                }
                 break;
             case A:
-                imageView.moveImageX( -MOVEMENT_PIXEL );
+                if(zoomedIn){
+                    imageView.moveImageX( -MOVEMENT_PIXEL );
+                }
                 break;
             case D:
-                imageView.moveImageX( MOVEMENT_PIXEL );
+                if(zoomedIn){
+                    imageView.moveImageX( MOVEMENT_PIXEL );
+                }
                 break;
             case PAGE_UP:
                 imageView.setImageAndFit( ip.prev() );

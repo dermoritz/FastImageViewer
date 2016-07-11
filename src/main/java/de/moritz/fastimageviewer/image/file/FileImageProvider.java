@@ -1,29 +1,34 @@
 package de.moritz.fastimageviewer.image.file;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import de.moritz.fastimageviewer.image.ImageProvider;
-import javafx.scene.image.Image;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.*;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+
+import de.moritz.fastimageviewer.image.ImageProvider;
+import javafx.scene.image.Image;
 
 public class FileImageProvider implements ImageProvider {
 
     private static final int FORWARD_BUFFER_SIZE = 2;
     private static final int BACK_BUFFER_SIZE = 1;
+    private static final PathMatcher IMAGE_FILE_PATTERN = FileSystems.getDefault().getPathMatcher( "glob:*.{jpg,jpeg,png,gif,bmp}" );
     private Path imageFolder;
     private List<Path> imagePaths = new ArrayList<>();
     private int currentIndex = 0;
@@ -42,14 +47,14 @@ public class FileImageProvider implements ImageProvider {
 
     private void getFiles() {
         List<Path> result = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(imageFolder, "*.{jpg,jpeg,png,gif,bmp}")) {
-            for (Path entry : stream) {
-                result.add(entry);
-            }
-        } catch (IOException ex) {
-            // I/O error encountered during the iteration, the cause is an
-            // IOException
-            throw new IllegalStateException("Problem on parsing folder: ", ex);
+        try {
+            Files.walk(imageFolder).forEach( (Path p) -> {
+                if( IMAGE_FILE_PATTERN.matches( p.getFileName() )) {
+                    result.add( p );
+                }
+            } );
+        } catch( IOException e ) {
+            throw new IllegalStateException("Problem on parsing folder: ", e);
         }
         imagePaths = result;
     }

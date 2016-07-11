@@ -12,6 +12,8 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -46,17 +48,11 @@ public class FileImageProvider implements ImageProvider {
     }
 
     private void getFiles() {
-        List<Path> result = new ArrayList<>();
-        try {
-            Files.walk(imageFolder).forEach( (Path p) -> {
-                if( IMAGE_FILE_PATTERN.matches( p.getFileName() )) {
-                    result.add( p );
-                }
-            } );
+        try( Stream<Path> files = Files.walk(imageFolder).sorted()) {
+            imagePaths = files.filter( path -> IMAGE_FILE_PATTERN.matches( path.getFileName() ) ).collect( Collectors.toList());
         } catch( IOException e ) {
             throw new IllegalStateException("Problem on parsing folder: ", e);
         }
-        imagePaths = result;
     }
 
     @Override

@@ -239,6 +239,8 @@ public class MainController {
             case ESCAPE:
                 Platform.exit();
                 break;
+            case I:
+                onInfoButton( null );
         }
     }
 

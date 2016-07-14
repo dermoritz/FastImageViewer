@@ -133,6 +133,7 @@ public class MainController {
         goButton.setOnAction( this::handlePathChanged );
         infoButton.setOnAction( this::onInfoButton );
         sortCheckBox.selectedProperty().addListener( this::sortChanged );
+
     }
 
     @FXML
@@ -145,6 +146,8 @@ public class MainController {
         if( args.length > 1 ) {
             filterField.setText( args[1].replaceFirst( "/", "" ) );
         }
+        //unfocus pathField
+        Platform.runLater( () -> root.requestFocus() );
     }
 
     private void handleMouseDown( MouseEvent event ) {

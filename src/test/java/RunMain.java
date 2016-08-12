@@ -8,7 +8,7 @@ public class RunMain {
 
     @Test
     public void runMainOnImageService(){
-        Main.main(new String[]{"http://localhost"});
+        Main.main(new String[]{"http://user1:0ljLYTheARvcMEbAmhEB@server/image"});
     }
 
     @Test

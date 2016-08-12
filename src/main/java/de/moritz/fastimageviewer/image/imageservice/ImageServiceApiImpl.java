@@ -28,7 +28,7 @@ public class ImageServiceApiImpl implements ImageServiceApi {
     private static final String INDEX_INFO_PATH = "/indexInfo";
     private static final String INDEX_FILTER_INFO = "/indexFilterInfo";
     private HttpRequestFactory requestFactory;
-    private GenericUrl baseUrl;
+    private final GenericUrl baseUrl;
     private String user;
     private String pass;
 
@@ -58,30 +58,34 @@ public class ImageServiceApiImpl implements ImageServiceApi {
 
     @Override
     public String getImageInfo(ImageServiceImageId id) {
-        baseUrl.setRawPath(getInfoPathFromId(id));
-        return readStringFromUrl(baseUrl);
+        GenericUrl url = new GenericUrl(baseUrl.toURL());
+        url.appendRawPath(getInfoPathFromId(id));
+        return readStringFromUrl(url);
     }
 
     @Override
     public int maxIndex() {
-        baseUrl.setRawPath(INDEX_PATH);
-        LOG.debug("Retieving max index from " + baseUrl);
-        return readIntFromUrl(baseUrl);
+        GenericUrl url = new GenericUrl(baseUrl.toURL());
+        url.appendRawPath(INDEX_PATH);
+        LOG.debug("Retieving max index from " + url);
+        return readIntFromUrl(url);
     }
 
     @Override
     public int maxIndexForFilter(String filter) {
-        baseUrl.setRawPath("/"+ cleatFirstSlash(filter) + INFO);
+        GenericUrl url = new GenericUrl(baseUrl.toURL());
+        url.appendRawPath("/"+ cleatFirstSlash(filter) + INFO);
         //because service returns number of files matching the filter we have to decrease by 1
-        return readIntFromUrl(baseUrl) - 1;
+        return readIntFromUrl(url) - 1;
     }
 
     private Image getImageFromResource(String path) {
-        baseUrl.setRawPath(path);
+        GenericUrl url = new GenericUrl(baseUrl.toURL());
+        url.appendRawPath(path);
         Image image = null;
         try {
-            LOG.debug("Loading image from " + baseUrl);
-            HttpRequest request = requestFactory.buildGetRequest(baseUrl);
+            LOG.debug("Loading image from " + url);
+            HttpRequest request = requestFactory.buildGetRequest(url);
             setAuth(request);
             HttpResponse response = request.execute();
             if (MediaType.parse(response.getContentType()).is(MediaType.ANY_IMAGE_TYPE)) {

@@ -125,7 +125,6 @@ public class MainController {
         root.setOnScroll( this::handleScroll );
         root.heightProperty().addListener( (observable)->handleResize() );
         root.widthProperty().addListener( (observable)->handleResize() );
-
         root.setOnDragOver( this::dragOver );
         root.setOnDragDropped( this::dropFile );
         imageArea.setOnMousePressed( this::handleMouseDown );
@@ -186,7 +185,6 @@ public class MainController {
     }
 
     public void onReady() {
-        //((Stage)root.getScene().getWindow()).maximizedProperty().addListener( ( observable)->handleResize() );
         if( ip != null && ip.hasNext() ) {
             imageView.setImageAndFit( ip.next() );
         }

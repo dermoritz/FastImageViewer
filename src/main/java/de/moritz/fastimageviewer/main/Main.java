@@ -29,7 +29,7 @@ public class Main extends Application {
 		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "DEBUG");
         LOG = LoggerFactory.getLogger( Main.class );
 		i = Guice.createInjector(new DiModule(args.length > 0 ? args : null));
-        installTrust();
+        //installTrust();
 		Application.launch(args);
 	}
 

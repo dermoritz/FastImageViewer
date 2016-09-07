@@ -123,8 +123,9 @@ public class MainController {
     private void registerEvents() {
         root.addEventFilter( KeyEvent.KEY_PRESSED, this::keys );
         root.setOnScroll( this::handleScroll );
-        root.heightProperty().addListener( this::handleResize );
-        root.widthProperty().addListener( this::handleResize );
+        root.heightProperty().addListener( (observable)->handleResize() );
+        root.widthProperty().addListener( (observable)->handleResize() );
+
         root.setOnDragOver( this::dragOver );
         root.setOnDragDropped( this::dropFile );
         imageArea.setOnMousePressed( this::handleMouseDown );
@@ -185,6 +186,7 @@ public class MainController {
     }
 
     public void onReady() {
+        //((Stage)root.getScene().getWindow()).maximizedProperty().addListener( ( observable)->handleResize() );
         if( ip != null && ip.hasNext() ) {
             imageView.setImageAndFit( ip.next() );
         }
@@ -279,8 +281,9 @@ public class MainController {
         }
     }
 
-    private void handleResize( ObservableValue<? extends Number> observable, Number oldValue, Number newValue ) {
-        imageView.fitImage();
+    private void handleResize( ) {
+        //using run later to be sure the call is done after resize is finished
+        Platform.runLater( imageView::fitImage);
     }
 
     private void sortChanged( ObservableValue<? extends Boolean> selected, Boolean oldV, Boolean newV ) {

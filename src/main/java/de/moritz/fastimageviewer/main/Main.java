@@ -78,7 +78,7 @@ public class Main extends Application {
         closeItem.addActionListener( listenerClose );
         popup.add( openItem );
         popup.add( closeItem );
-        Image image = Toolkit.getDefaultToolkit().getImage( ClassLoader.getSystemClassLoader().getResource( "Google Images-16.png" ) );
+        Image image = Toolkit.getDefaultToolkit().getImage( ClassLoader.getSystemClassLoader().getResource( "Stack of Photos-16.png" ) );
         TrayIcon icon = new TrayIcon( image, "images", popup );
         icon.addMouseListener( new MouseListener() {
             @Override

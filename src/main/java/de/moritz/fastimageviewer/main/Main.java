@@ -84,7 +84,12 @@ public class Main extends Application {
             @Override
             public void mouseClicked( MouseEvent e ) {
                 if(e.getClickCount()>=2){
-                    Platform.runLater( () ->primaryStage.show() );
+                    if(primaryStage.isShowing()){
+                        Platform.runLater( () ->primaryStage.hide() );
+                    }
+                    else {
+                        Platform.runLater( () ->primaryStage.show() );
+                    }
                 }
             }
 

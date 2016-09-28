@@ -240,7 +240,7 @@ public class MainController {
                 event.consume();
                 break;
             case ESCAPE:
-                Platform.exit();
+                root.getScene().getWindow().hide();
                 break;
             case I:
                 onInfoButton( null );

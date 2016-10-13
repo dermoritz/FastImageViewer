@@ -214,11 +214,16 @@ public class MainController {
             case W:
                 if(zoomedIn){
                     imageView.moveImageY( MOVEMENT_PIXEL );
+                } else if(!filterField.isFocused() && !pathField.isFocused()){
+                    imageView.setImageAndFit( ip.prev() );
                 }
+
                 break;
             case S:
                 if(zoomedIn){
                     imageView.moveImageY( -MOVEMENT_PIXEL );
+                } else if(!filterField.isFocused() && !pathField.isFocused()){
+                    imageView.setImageAndFit( ip.next() );
                 }
                 break;
             case A:

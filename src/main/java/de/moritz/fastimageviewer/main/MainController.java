@@ -228,12 +228,12 @@ public class MainController {
                 break;
             case A:
                 if(zoomedIn){
-                    imageView.moveImageX( -MOVEMENT_PIXEL );
+                    imageView.moveImageX( MOVEMENT_PIXEL );
                 }
                 break;
             case D:
                 if(zoomedIn){
-                    imageView.moveImageX( MOVEMENT_PIXEL );
+                    imageView.moveImageX( -MOVEMENT_PIXEL );
                 }
                 break;
             case PAGE_UP:

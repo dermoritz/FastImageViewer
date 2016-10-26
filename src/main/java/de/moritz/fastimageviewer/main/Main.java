@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.melloware.jintellitype.JIntellitype;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -36,6 +37,8 @@ public class Main extends Application {
     private static Logger LOG = null;
 
     private static Injector i;
+
+    private static final int RESTORE = 1;
 
     public static void main(String[] args) {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "DEBUG");
@@ -52,8 +55,9 @@ public class Main extends Application {
 
         if (SystemTray.isSupported()) {
             setupTray( primaryStage );
-
         }
+
+        setupGlobalHotkey(primaryStage);
 
         fxmlLoader.setController(controller);
         Scene scene = new Scene(fxmlLoader.load());
@@ -61,6 +65,15 @@ public class Main extends Application {
         primaryStage.setMaximized(true);
         primaryStage.show();
         controller.onReady();
+    }
+
+    private void setupGlobalHotkey( Stage primaryStage ) {
+        try {
+            JIntellitype.getInstance().registerHotKey( RESTORE, JIntellitype.MOD_ALT + JIntellitype.MOD_CONTROL,(int)'I');
+            JIntellitype.getInstance().addHotKeyListener( (i) -> Platform.runLater( ()-> primaryStage.show()) );
+        } catch( Exception e ){
+            LOG.info( "Could not register global HotKey: ", e );
+        }
     }
 
     private void setupTray( final Stage primaryStage ) throws AWTException {

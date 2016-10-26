@@ -150,6 +150,10 @@ public class MainController {
         Platform.runLater( () -> root.requestFocus() );
     }
 
+    private void globalHotkeys( int i ) {
+
+    }
+
     private void handleMouseDown( MouseEvent event ) {
         if( event.getSource().equals( imageArea ) ) {
             imageView.requestFocus();

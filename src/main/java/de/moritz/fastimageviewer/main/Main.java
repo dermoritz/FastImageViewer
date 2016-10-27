@@ -13,18 +13,22 @@ import java.awt.event.MouseListener;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.logging.Level;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.melloware.jintellitype.JIntellitype;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -69,11 +73,34 @@ public class Main extends Application {
 
     private void setupGlobalHotkey( Stage primaryStage ) {
         try {
-            JIntellitype.getInstance().registerHotKey( RESTORE, JIntellitype.MOD_ALT + JIntellitype.MOD_CONTROL,(int)'I');
-            JIntellitype.getInstance().addHotKeyListener( (i) -> Platform.runLater( ()-> primaryStage.show()) );
-        } catch( Exception e ){
-            LOG.info( "Could not register global HotKey: ", e );
+            java.util.logging.Logger logger = java.util.logging.Logger.getLogger( GlobalScreen.class.getPackage().getName() );
+            logger.setLevel( Level.WARNING );
+            logger.setUseParentHandlers( false );
+            GlobalScreen.registerNativeHook();
+        } catch( NativeHookException e ) {
+            LOG.warn( "Problem on registering hot key." );
         }
+
+        GlobalScreen.addNativeKeyListener( new NativeKeyListener() {
+            @Override
+            public void nativeKeyPressed( NativeKeyEvent nativeKeyEvent ) {
+                boolean ctrlIsPressed = (nativeKeyEvent.getModifiers() & NativeKeyEvent.CTRL_MASK) != 0;
+                boolean altIsPressed = (nativeKeyEvent.getModifiers() & NativeKeyEvent.ALT_MASK) != 0;
+                if(ctrlIsPressed && altIsPressed && nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_I){
+                    Platform.runLater( ()->primaryStage.show() );
+                }
+            }
+
+            @Override
+            public void nativeKeyReleased( NativeKeyEvent nativeKeyEvent ) {
+
+            }
+
+            @Override
+            public void nativeKeyTyped( NativeKeyEvent nativeKeyEvent ) {
+
+            }
+        } );
     }
 
     private void setupTray( final Stage primaryStage ) throws AWTException {

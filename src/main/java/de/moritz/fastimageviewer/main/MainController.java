@@ -248,6 +248,7 @@ public class MainController {
                 root.getScene().getWindow().hide();
                 break;
             case I:
+            case Q:
                 onInfoButton( null );
         }
     }

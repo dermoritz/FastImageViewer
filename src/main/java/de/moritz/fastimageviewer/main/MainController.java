@@ -1,5 +1,7 @@
 package de.moritz.fastimageviewer.main;
 
+import java.util.concurrent.Executors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -191,7 +193,11 @@ public class MainController {
     }
 
     private void onInfoButton( ActionEvent event ) {
-        infoField.setText( ip.getInfoForLast() );
+        try {
+            Executors.callable(() -> infoField.setText( ip.getInfoForLast() )).call();
+        } catch( Exception e ) {
+            LOG.error("Problem on getting info: " + e);
+        }
     }
 
     private void handlePathChanged( ActionEvent event ) {

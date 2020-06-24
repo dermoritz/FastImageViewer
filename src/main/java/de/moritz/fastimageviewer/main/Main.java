@@ -60,6 +60,8 @@ public class Main extends Application {
         if (SystemTray.isSupported()) {
             setupTray( primaryStage );
         }
+        //add icon
+        primaryStage.getIcons().add(new javafx.scene.image.Image(ClassLoader.getSystemClassLoader().getResourceAsStream("Stack of Photos-16.png")));
 
         setupGlobalHotkey(primaryStage);
 

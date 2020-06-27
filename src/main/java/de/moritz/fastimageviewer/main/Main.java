@@ -67,6 +67,7 @@ public class Main extends Application {
 
         fxmlLoader.setController(controller);
         Scene scene = new Scene(fxmlLoader.load());
+        scene.getRoot().setStyle("-fx-base:black");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();

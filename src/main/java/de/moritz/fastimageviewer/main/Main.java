@@ -35,6 +35,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 
@@ -42,7 +43,17 @@ public class Main extends Application {
 
     private static Injector i;
 
-    private static final int RESTORE = 1;
+	private Stage primaryStage;
+	
+	private boolean positionStored = false;
+
+	private double x;
+
+	private double y;
+
+	private double height;
+
+	private double width;
 
     public static void main(String[] args) {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "DEBUG");
@@ -54,7 +65,8 @@ public class Main extends Application {
 
     @Override
     public void start(final Stage primaryStage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout.fxml"));
+        this.primaryStage = primaryStage;
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout.fxml"));
         MainController controller = i.getInstance(MainController.class);
 
         if (SystemTray.isSupported()) {
@@ -64,7 +76,8 @@ public class Main extends Application {
         primaryStage.getIcons().add(new javafx.scene.image.Image(ClassLoader.getSystemClassLoader().getResourceAsStream("Stack of Photos-16.png")));
 
         setupGlobalHotkey(primaryStage);
-
+        primaryStage.setOnHiding(this::onHiding);
+        primaryStage.setOnShowing(this::onShowing);
         fxmlLoader.setController(controller);
         Scene scene = new Scene(fxmlLoader.load());
         scene.getRoot().setStyle("-fx-base:black");
@@ -184,5 +197,23 @@ public class Main extends Application {
             LOG.warn("Problem installing cert manager - to allow untrusted ssl connections:", e);
         }
     }
+
+	private void onHiding(WindowEvent windowevent) {
+		positionStored = true;
+		x = primaryStage.getX();
+		y = primaryStage.getY();
+		height = primaryStage.getHeight();
+		width = primaryStage.getWidth();
+	}
+
+	private void onShowing(WindowEvent windowevent) {
+		if (positionStored) {
+			primaryStage.setX(x);
+			primaryStage.setY(y);
+			primaryStage.setWidth(width);
+			primaryStage.setHeight(height);
+		}
+		
+	}
 
 }

@@ -194,11 +194,11 @@ public class MainController {
     }
 
     private void onInfoButton( ActionEvent event ) {
-        try {
-            CompletableFuture.runAsync(() -> infoField.setText( ip.getInfoForLast() ));
-        } catch( Exception e ) {
-            LOG.error("Problem on getting info: " + e);
-        }
+        CompletableFuture<Void> updateText = CompletableFuture.runAsync(() -> infoField.setText(ip.getInfoForLast()));
+        updateText.exceptionally(ex -> {
+            LOG.error("Problem on getting info: " + ex);
+            return null;
+        });
     }
 
     private void handlePathChanged( ActionEvent event ) {

@@ -1,5 +1,6 @@
 package de.moritz.fastimageviewer.main;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -194,7 +195,7 @@ public class MainController {
 
     private void onInfoButton( ActionEvent event ) {
         try {
-            Executors.callable(() -> infoField.setText( ip.getInfoForLast() )).call();
+            CompletableFuture.runAsync(() -> infoField.setText( ip.getInfoForLast() ));
         } catch( Exception e ) {
             LOG.error("Problem on getting info: " + e);
         }

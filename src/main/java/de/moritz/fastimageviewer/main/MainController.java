@@ -1,11 +1,11 @@
 package de.moritz.fastimageviewer.main;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +44,7 @@ import javafx.scene.layout.StackPane;
 public class MainController {
 
     private final ImageViewer imageView;
+    private final EventBus eventBus;
     private ImageProvider ip;
     private final String[] args;
     private static final float MOVEMENT_PIXEL = 50f;
@@ -86,13 +87,14 @@ public class MainController {
     private Double mouseStartY;
 
     @Inject
-    public MainController( ImageViewer imageView, @Args String[] args, FileImageProvider.Inst fileImageProviderFactory,
-                           ImageServiceImageProvider.Inst serviceImageProviderFactory ) {
+    public MainController(ImageViewer imageView, @Args String[] args, FileImageProvider.Inst fileImageProviderFactory,
+                          ImageServiceImageProvider.Inst serviceImageProviderFactory, EventBus eventBus) {
         this.args = args;
         this.fileImageProviderFactory = fileImageProviderFactory;
         this.serviceImageProviderFactory = serviceImageProviderFactory;
         this.ip = getIp( args );
         this.imageView = imageView;
+        this.eventBus = eventBus;
     }
 
     @Subscribe
@@ -141,6 +143,8 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        //registering this and "activating" @Subscribe annotated methods here
+        eventBus.register(this);
         imageArea.getChildren().add( imageView.getImageView() );
         registerEvents();
         if( args.length > 0 ) {

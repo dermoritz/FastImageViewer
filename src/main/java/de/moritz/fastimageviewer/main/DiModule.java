@@ -42,17 +42,7 @@ public class DiModule extends AbstractModule {
         install(new FactoryModuleBuilder().implement(ImageServiceApi.class, ImageServiceApiImpl.class)
                                           .build(ImageServiceApiFactory.class));
         bind(EventBus.class).toInstance(eventBus);
-        bindListener(Matchers.any(), new TypeListener() {
 
-            @Override
-            public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-                encounter.register((InjectionListener<I>) injectee -> {
-                    eventBus.register(injectee);
-
-                });
-
-            }
-        });
     }
 
     @Provides
